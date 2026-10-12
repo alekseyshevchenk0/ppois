@@ -23,7 +23,6 @@ public:
 
     bool isValidMove(int row, int col) const;
 
-
     void setMove(int row, int col, char mark);
 
     char getCell(int row, int col) const;
