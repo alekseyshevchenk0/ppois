@@ -1,0 +1,319 @@
+\doxysection{Tic\+Tac\+Toe Class Reference}
+\hypertarget{classTicTacToe}{}\label{classTicTacToe}\index{TicTacToe@{TicTacToe}}
+
+
+Класс, реализующий игровую логику, состояние и правила крестиков-\/ноликов.  
+
+
+
+
+{\ttfamily \+\#include $<$tictactoe.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{classTicTacToe_a103fe9a5ae41b5ef756e20594a70cb7a}{Tic\+Tac\+Toe}} ()
+\begin{DoxyCompactList}\small\item\em Конструктор по умолчанию. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{classTicTacToe_a84b188da3a9356f6b2e759563de88bf5}{Tic\+Tac\+Toe}} (int board\+Size)
+\begin{DoxyCompactList}\small\item\em Конструктор с параметром размера поля. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{classTicTacToe_a341c14c8603d60a93523f657b60a08f9}{Tic\+Tac\+Toe}} (const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&other)
+\begin{DoxyCompactList}\small\item\em Конструктор копирования. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \& \doxymbox{\hyperlink{classTicTacToe_aab5bcbf7d501d8bb11bcb1c3a1512369}{operator=}} (const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&other)
+\begin{DoxyCompactList}\small\item\em Оператор присваивания копированием. \end{DoxyCompactList}\item 
+\Hypertarget{classTicTacToe_a5ea5286d4122bb05bad38823dc7bd49a}\label{classTicTacToe_a5ea5286d4122bb05bad38823dc7bd49a} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}\+Tic\+Tac\+Toe} ()=default
+\begin{DoxyCompactList}\small\item\em Деструктор по умолчанию. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{classTicTacToe_ae391526ae5016a7e9da3026b82d5e96e}{is\+Valid\+Move}} (int row, int col) const
+\begin{DoxyCompactList}\small\item\em Проверяет, является ли ход в указанную ячейку допустимым. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{classTicTacToe_a82306793352335275cd6d52c042f2257}{set\+Move}} (int row, int col, char mark)
+\begin{DoxyCompactList}\small\item\em Устанавливает ход игрока в заданную позицию. \end{DoxyCompactList}\item 
+char \doxymbox{\hyperlink{classTicTacToe_a33f2f711753613cc9b25d200e4c4be2d}{get\+Cell}} (int row, int col) const
+\begin{DoxyCompactList}\small\item\em Получает символ в конкретной ячейке поля. \end{DoxyCompactList}\item 
+char \doxymbox{\hyperlink{classTicTacToe_a2471d3bf1d4516d14b088acd3e8c7f71}{check\+Winner}} () const
+\begin{DoxyCompactList}\small\item\em Проверяет наличие победителя на игровом поле. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{classTicTacToe_ad360299b605d5037602ee10d4c07dc5a}{is\+Board\+Full}} () const
+\begin{DoxyCompactList}\small\item\em Проверяет, заполнено ли игровое поле полностью. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{classTicTacToe_ac4094411e8606fe60630a123d4941827}{get\+Size}} () const
+\begin{DoxyCompactList}\small\item\em Возвращает текущий размер игрового поля. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{classTicTacToe_adeab7fcf93aca5e58d1ec215657b0260}{operator==}} (const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&other) const
+\begin{DoxyCompactList}\small\item\em Оператор проверки на равенство игр. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{classTicTacToe_a1bcefa7f1da162fdb97527559645b1e2}{operator!=}} (const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&other) const
+\begin{DoxyCompactList}\small\item\em Оператор проверки на неравенство игр. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+std::\+ostream \& \doxymbox{\hyperlink{classTicTacToe_a6f379ee1f3b74b0597503cc13ae6a57d}{operator$<$$<$}} (std::\+ostream \&os, const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&game)
+\begin{DoxyCompactList}\small\item\em Перегрузка оператора вывода игры в поток. \end{DoxyCompactList}\item 
+std::\+istream \& \doxymbox{\hyperlink{classTicTacToe_aa97ab1af3fb7aee0fcc4333625670d0d}{operator$>$$>$}} (std::\+istream \&is, \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&game)
+\begin{DoxyCompactList}\small\item\em Перегрузка оператора ввода игры из потока. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Класс, реализующий игровую логику, состояние и правила крестиков-\/ноликов. 
+
+\label{doc-constructors}
+\Hypertarget{classTicTacToe_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classTicTacToe_a103fe9a5ae41b5ef756e20594a70cb7a}\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
+\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{TicTacToe()}{TicTacToe()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily \label{classTicTacToe_a103fe9a5ae41b5ef756e20594a70cb7a} 
+Tic\+Tac\+Toe::\+\+Tic\+Tac\+Toe (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Конструктор по умолчанию. 
+
+Создает стандартное игровое поле размером 3x3, начинает игру с игрока \textquotesingle{}X\textquotesingle{}. \Hypertarget{classTicTacToe_a84b188da3a9356f6b2e759563de88bf5}\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
+\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{TicTacToe()}{TicTacToe()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily \label{classTicTacToe_a84b188da3a9356f6b2e759563de88bf5} 
+Tic\+Tac\+Toe::\+\+Tic\+Tac\+Toe (\begin{DoxyParamCaption}\item[{int}]{board\+Size}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Конструктор с параметром размера поля. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em board\+Size} & Размер игрового поля (должен быть больше 0). \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std::\+invalid\+\_\+argument} & если board\+Size \texorpdfstring{$<$}{<}= 0. \\
+\hline
+\end{DoxyExceptions}
+\Hypertarget{classTicTacToe_a341c14c8603d60a93523f657b60a08f9}\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
+\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{TicTacToe()}{TicTacToe()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily \label{classTicTacToe_a341c14c8603d60a93523f657b60a08f9} 
+Tic\+Tac\+Toe::\+\+Tic\+Tac\+Toe (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{other}{}\end{DoxyParamCaption})}
+
+
+
+Конструктор копирования. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em other} & Ссылка на другой объект игры \doxylink{classTicTacToe}{Tic\+Tac\+Toe} для копирования. \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-func-members}
+\Hypertarget{classTicTacToe_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classTicTacToe_a2471d3bf1d4516d14b088acd3e8c7f71}\index{TicTacToe@{TicTacToe}!checkWinner@{checkWinner}}
+\index{checkWinner@{checkWinner}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{checkWinner()}{checkWinner()}}
+{\footnotesize\ttfamily \label{classTicTacToe_a2471d3bf1d4516d14b088acd3e8c7f71} 
+char Tic\+Tac\+Toe::\+check\+Winner (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Проверяет наличие победителя на игровом поле. 
+
+\begin{DoxyReturn}{Returns}
+Символ победителя (\textquotesingle{}X\textquotesingle{} или \textquotesingle{}O\textquotesingle{}), либо пробел (\textquotesingle{} \textquotesingle{}), если победителя пока нет. 
+\end{DoxyReturn}
+\Hypertarget{classTicTacToe_a33f2f711753613cc9b25d200e4c4be2d}\index{TicTacToe@{TicTacToe}!getCell@{getCell}}
+\index{getCell@{getCell}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{getCell()}{getCell()}}
+{\footnotesize\ttfamily \label{classTicTacToe_a33f2f711753613cc9b25d200e4c4be2d} 
+char Tic\+Tac\+Toe::\+get\+Cell (\begin{DoxyParamCaption}\item[{int}]{row}{, }\item[{int}]{col}{}\end{DoxyParamCaption}) const}
+
+
+
+Получает символ в конкретной ячейке поля. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em row} & Индекс строки. \\
+\hline
+{\em col} & Индекс столбца. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Символ в ячейке (\textquotesingle{}X\textquotesingle{}, \textquotesingle{}O\textquotesingle{} или \textquotesingle{} \textquotesingle{}). 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std::\+out\+\_\+of\+\_\+range} & если координаты выходят за пределы поля. \\
+\hline
+\end{DoxyExceptions}
+\Hypertarget{classTicTacToe_ac4094411e8606fe60630a123d4941827}\index{TicTacToe@{TicTacToe}!getSize@{getSize}}
+\index{getSize@{getSize}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{getSize()}{getSize()}}
+{\footnotesize\ttfamily \label{classTicTacToe_ac4094411e8606fe60630a123d4941827} 
+int Tic\+Tac\+Toe::\+get\+Size (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Возвращает текущий размер игрового поля. 
+
+\begin{DoxyReturn}{Returns}
+Размер поля (int). 
+\end{DoxyReturn}
+\Hypertarget{classTicTacToe_ad360299b605d5037602ee10d4c07dc5a}\index{TicTacToe@{TicTacToe}!isBoardFull@{isBoardFull}}
+\index{isBoardFull@{isBoardFull}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{isBoardFull()}{isBoardFull()}}
+{\footnotesize\ttfamily \label{classTicTacToe_ad360299b605d5037602ee10d4c07dc5a} 
+bool Tic\+Tac\+Toe::\+is\+Board\+Full (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Проверяет, заполнено ли игровое поле полностью. 
+
+\begin{DoxyReturn}{Returns}
+true, если свободных ячеек не осталось (ничья), иначе false. 
+\end{DoxyReturn}
+\Hypertarget{classTicTacToe_ae391526ae5016a7e9da3026b82d5e96e}\index{TicTacToe@{TicTacToe}!isValidMove@{isValidMove}}
+\index{isValidMove@{isValidMove}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{isValidMove()}{isValidMove()}}
+{\footnotesize\ttfamily \label{classTicTacToe_ae391526ae5016a7e9da3026b82d5e96e} 
+bool Tic\+Tac\+Toe::\+is\+Valid\+Move (\begin{DoxyParamCaption}\item[{int}]{row}{, }\item[{int}]{col}{}\end{DoxyParamCaption}) const}
+
+
+
+Проверяет, является ли ход в указанную ячейку допустимым. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em row} & Индекс строки (начиная с 0). \\
+\hline
+{\em col} & Индекс столбца (начиная с 0). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true, если координаты в пределах поля и ячейка пуста, иначе false. 
+\end{DoxyReturn}
+\Hypertarget{classTicTacToe_a1bcefa7f1da162fdb97527559645b1e2}\index{TicTacToe@{TicTacToe}!operator"!=@{operator"!=}}
+\index{operator"!=@{operator"!=}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{operator"!=()}{operator!=()}}
+{\footnotesize\ttfamily \label{classTicTacToe_a1bcefa7f1da162fdb97527559645b1e2} 
+bool Tic\+Tac\+Toe::\+operator!= (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{other}{}\end{DoxyParamCaption}) const}
+
+
+
+Оператор проверки на неравенство игр. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em other} & Объект для сравнения. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true, если игры отличаются, иначе false. 
+\end{DoxyReturn}
+\Hypertarget{classTicTacToe_aab5bcbf7d501d8bb11bcb1c3a1512369}\index{TicTacToe@{TicTacToe}!operator=@{operator=}}
+\index{operator=@{operator=}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \label{classTicTacToe_aab5bcbf7d501d8bb11bcb1c3a1512369} 
+\doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \& Tic\+Tac\+Toe::\+operator= (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{other}{}\end{DoxyParamCaption})}
+
+
+
+Оператор присваивания копированием. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em other} & Ссылка на другой объект игры \doxylink{classTicTacToe}{Tic\+Tac\+Toe}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Ссылка на текущий измененный объект. 
+\end{DoxyReturn}
+\Hypertarget{classTicTacToe_adeab7fcf93aca5e58d1ec215657b0260}\index{TicTacToe@{TicTacToe}!operator==@{operator==}}
+\index{operator==@{operator==}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{operator==()}{operator==()}}
+{\footnotesize\ttfamily \label{classTicTacToe_adeab7fcf93aca5e58d1ec215657b0260} 
+bool Tic\+Tac\+Toe::\+operator== (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{other}{}\end{DoxyParamCaption}) const}
+
+
+
+Оператор проверки на равенство игр. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em other} & Объект для сравнения. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true, если размер, текущий игрок и состояние поля равны, иначе false. 
+\end{DoxyReturn}
+\Hypertarget{classTicTacToe_a82306793352335275cd6d52c042f2257}\index{TicTacToe@{TicTacToe}!setMove@{setMove}}
+\index{setMove@{setMove}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{setMove()}{setMove()}}
+{\footnotesize\ttfamily \label{classTicTacToe_a82306793352335275cd6d52c042f2257} 
+void Tic\+Tac\+Toe::\+set\+Move (\begin{DoxyParamCaption}\item[{int}]{row}{, }\item[{int}]{col}{, }\item[{char}]{mark}{}\end{DoxyParamCaption})}
+
+
+
+Устанавливает ход игрока в заданную позицию. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em row} & Индекс строки. \\
+\hline
+{\em col} & Индекс столбца. \\
+\hline
+{\em mark} & Символ игрока (\textquotesingle{}X\textquotesingle{} или \textquotesingle{}O\textquotesingle{}). \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std::\+out\+\_\+of\+\_\+range} & если ход невалидный (ячейка занята или вне границ). \\
+\hline
+\end{DoxyExceptions}
+
+
+\label{doc-related-members}
+\Hypertarget{classTicTacToe_doc-related-members}
+\doxysubsection{Friends And Related Symbol Documentation}
+\Hypertarget{classTicTacToe_a6f379ee1f3b74b0597503cc13ae6a57d}\index{TicTacToe@{TicTacToe}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{operator$<$$<$}{operator<<}}
+{\footnotesize\ttfamily \label{classTicTacToe_a6f379ee1f3b74b0597503cc13ae6a57d} 
+std::\+ostream \& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std::\+ostream \&}]{os}{, }\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{game}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+
+
+
+Перегрузка оператора вывода игры в поток. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em os} & Поток вывода. \\
+\hline
+{\em game} & Объект игры \doxylink{classTicTacToe}{Tic\+Tac\+Toe}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Ссылка на поток вывода. 
+\end{DoxyReturn}
+\Hypertarget{classTicTacToe_aa97ab1af3fb7aee0fcc4333625670d0d}\index{TicTacToe@{TicTacToe}!operator$>$$>$@{operator$>$$>$}}
+\index{operator$>$$>$@{operator$>$$>$}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{operator$>$$>$}{operator>>}}
+{\footnotesize\ttfamily \label{classTicTacToe_aa97ab1af3fb7aee0fcc4333625670d0d} 
+std::\+istream \& operator$>$$>$ (\begin{DoxyParamCaption}\item[{std::\+istream \&}]{is}{, }\item[{\doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{game}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+
+
+
+Перегрузка оператора ввода игры из потока. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em is} & Поток ввода. \\
+\hline
+{\em game} & Объект игры \doxylink{classTicTacToe}{Tic\+Tac\+Toe} для заполнения. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Ссылка на поток ввода. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files:\+\begin{DoxyCompactItemize}
+\item 
+include/\+\doxymbox{\hyperlink{tictactoe_8hpp}{tictactoe.\+hpp}}\item 
+src/\+tictactoe.\+cpp\end{DoxyCompactItemize}
