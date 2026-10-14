@@ -2,6 +2,15 @@
 #include <limits>
 #include "tictactoe.hpp"
 
+namespace {
+
+void clearInput() {
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
+}
+
 void printBoard(const TicTacToe& game) {
     int size = game.getSize();
     std::cout << "\n    ";
@@ -27,19 +36,20 @@ void printBoard(const TicTacToe& game) {
     }
     std::cout << "-\n\n";
 }
+
 void playTicTacToe() {
     int size = 3;
     std::cout << "Введите размер поля (например, 3 для 3x3): ";
     if (!(std::cin >> size) || size <= 0) {
+        if (std::cin.eof()) return;
         std::cout << "Некорректный размер, устанавливается значение по умолчанию: 3.\n";
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        clearInput();
         size = 3;
     }
 
     TicTacToe game(size);
-    char currentMark = 'X';
     std::cout << "\nИгра началась. Первым ходит крестик (X).\n";
+
     while (true) {
         printBoard(game);
 
@@ -54,21 +64,22 @@ void playTicTacToe() {
             break;
         }
 
+        char mark = game.getCurrentPlayer();
         int row, col;
-        std::cout << "Ходит '" << currentMark << "'. Введите строку и столбец (через пробел, от 1 до " << size << "): ";
-        
+        std::cout << "Ходит '" << mark << "'. Введите строку и столбец (через пробел, от 1 до "
+                  << size << "): ";
+
         if (!(std::cin >> row >> col)) {
+            if (std::cin.eof()) return;
             std::cout << "Ошибка ввода. Пожалуйста, вводите числа\n";
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            clearInput();
             continue;
         }
-        row--;
-        col--;
+        --row;
+        --col;
 
         if (game.isValidMove(row, col)) {
-            game.setMove(row, col, currentMark);
-            currentMark = (currentMark == 'X') ? 'O' : 'X';
+            game.setMove(row, col, mark);
         } else {
             std::cout << "Неверный ход. Клетка уже занята или выходит за пределы поля. Попробуйте снова\n";
         }
@@ -84,9 +95,9 @@ int main() {
         std::cout << "Выберите пункт меню: ";
 
         if (!(std::cin >> choice)) {
+            if (std::cin.eof()) break;
             std::cout << "Некорректный ввод\n";
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            clearInput();
             continue;
         }
 
@@ -100,6 +111,8 @@ int main() {
             default:
                 std::cout << "Неверный пункт меню, попробуйте снова\n";
         }
+
+        if (std::cin.eof()) break;
         std::cout << "\n";
     } while (choice != 2);
 

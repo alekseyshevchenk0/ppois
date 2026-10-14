@@ -12,17 +12,8 @@
 \doxysubsubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\doxymbox{\hyperlink{classTicTacToe_a103fe9a5ae41b5ef756e20594a70cb7a}{Tic\+Tac\+Toe}} ()
-\begin{DoxyCompactList}\small\item\em Конструктор по умолчанию. \end{DoxyCompactList}\item 
-\doxymbox{\hyperlink{classTicTacToe_a84b188da3a9356f6b2e759563de88bf5}{Tic\+Tac\+Toe}} (int board\+Size)
+\doxymbox{\hyperlink{classTicTacToe_a9d8b3dbd60492e42dab1e58963ce5450}{Tic\+Tac\+Toe}} (int board\+Size=3)
 \begin{DoxyCompactList}\small\item\em Конструктор с параметром размера поля. \end{DoxyCompactList}\item 
-\doxymbox{\hyperlink{classTicTacToe_a341c14c8603d60a93523f657b60a08f9}{Tic\+Tac\+Toe}} (const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&other)
-\begin{DoxyCompactList}\small\item\em Конструктор копирования. \end{DoxyCompactList}\item 
-\doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \& \doxymbox{\hyperlink{classTicTacToe_aab5bcbf7d501d8bb11bcb1c3a1512369}{operator=}} (const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&other)
-\begin{DoxyCompactList}\small\item\em Оператор присваивания копированием. \end{DoxyCompactList}\item 
-\Hypertarget{classTicTacToe_a5ea5286d4122bb05bad38823dc7bd49a}\label{classTicTacToe_a5ea5286d4122bb05bad38823dc7bd49a} 
-{\bfseries \texorpdfstring{$\sim$}{\string~}\+Tic\+Tac\+Toe} ()=default
-\begin{DoxyCompactList}\small\item\em Деструктор по умолчанию. \end{DoxyCompactList}\item 
 bool \doxymbox{\hyperlink{classTicTacToe_ae391526ae5016a7e9da3026b82d5e96e}{is\+Valid\+Move}} (int row, int col) const
 \begin{DoxyCompactList}\small\item\em Проверяет, является ли ход в указанную ячейку допустимым. \end{DoxyCompactList}\item 
 void \doxymbox{\hyperlink{classTicTacToe_a82306793352335275cd6d52c042f2257}{set\+Move}} (int row, int col, char mark)
@@ -35,6 +26,8 @@ bool \doxymbox{\hyperlink{classTicTacToe_ad360299b605d5037602ee10d4c07dc5a}{is\+
 \begin{DoxyCompactList}\small\item\em Проверяет, заполнено ли игровое поле полностью. \end{DoxyCompactList}\item 
 int \doxymbox{\hyperlink{classTicTacToe_ac4094411e8606fe60630a123d4941827}{get\+Size}} () const
 \begin{DoxyCompactList}\small\item\em Возвращает текущий размер игрового поля. \end{DoxyCompactList}\item 
+char \doxymbox{\hyperlink{classTicTacToe_a023953c9f86b4113446bf3f2042f2b73}{get\+Current\+Player}} () const
+\begin{DoxyCompactList}\small\item\em Возвращает символ игрока, чей ход сейчас. \end{DoxyCompactList}\item 
 bool \doxymbox{\hyperlink{classTicTacToe_adeab7fcf93aca5e58d1ec215657b0260}{operator==}} (const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&other) const
 \begin{DoxyCompactList}\small\item\em Оператор проверки на равенство игр. \end{DoxyCompactList}\item 
 bool \doxymbox{\hyperlink{classTicTacToe_a1bcefa7f1da162fdb97527559645b1e2}{operator!=}} (const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&other) const
@@ -54,29 +47,19 @@ std::\+istream \& \doxymbox{\hyperlink{classTicTacToe_aa97ab1af3fb7aee0fcc433362
 \label{doc-constructors}
 \Hypertarget{classTicTacToe_doc-constructors}
 \doxysubsection{Constructor \& Destructor Documentation}
-\Hypertarget{classTicTacToe_a103fe9a5ae41b5ef756e20594a70cb7a}\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
+\Hypertarget{classTicTacToe_a9d8b3dbd60492e42dab1e58963ce5450}\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
 \index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
-\doxysubsubsection{\texorpdfstring{TicTacToe()}{TicTacToe()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
-{\footnotesize\ttfamily \label{classTicTacToe_a103fe9a5ae41b5ef756e20594a70cb7a} 
-Tic\+Tac\+Toe::\+\+Tic\+Tac\+Toe (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
-
-
-
-Конструктор по умолчанию. 
-
-Создает стандартное игровое поле размером 3x3, начинает игру с игрока \textquotesingle{}X\textquotesingle{}. \Hypertarget{classTicTacToe_a84b188da3a9356f6b2e759563de88bf5}\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
-\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
-\doxysubsubsection{\texorpdfstring{TicTacToe()}{TicTacToe()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
-{\footnotesize\ttfamily \label{classTicTacToe_a84b188da3a9356f6b2e759563de88bf5} 
-Tic\+Tac\+Toe::\+\+Tic\+Tac\+Toe (\begin{DoxyParamCaption}\item[{int}]{board\+Size}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+\doxysubsubsection{\texorpdfstring{TicTacToe()}{TicTacToe()}}
+{\footnotesize\ttfamily \label{classTicTacToe_a9d8b3dbd60492e42dab1e58963ce5450} 
+Tic\+Tac\+Toe::\+\+Tic\+Tac\+Toe (\begin{DoxyParamCaption}\item[{int}]{board\+Size}{ = {\ttfamily 3}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
 
 
 
 Конструктор с параметром размера поля. 
 
-
+Без аргумента создает стандартное поле 3x3. Игру начинает игрок \textquotesingle{}X\textquotesingle{}. Конструктор копирования, оператор присваивания и деструктор генерируются компилятором. 
 \begin{DoxyParams}{Parameters}
-{\em board\+Size} & Размер игрового поля (должен быть больше 0). \\
+{\em board\+Size} & Размер игрового поля (должен быть больше 0), по умолчанию 3. \\
 \hline
 \end{DoxyParams}
 
@@ -84,21 +67,6 @@ Tic\+Tac\+Toe::\+\+Tic\+Tac\+Toe (\begin{DoxyParamCaption}\item[{int}]{board\+Si
 {\em std::\+invalid\+\_\+argument} & если board\+Size \texorpdfstring{$<$}{<}= 0. \\
 \hline
 \end{DoxyExceptions}
-\Hypertarget{classTicTacToe_a341c14c8603d60a93523f657b60a08f9}\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
-\index{TicTacToe@{TicTacToe}!TicTacToe@{TicTacToe}}
-\doxysubsubsection{\texorpdfstring{TicTacToe()}{TicTacToe()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
-{\footnotesize\ttfamily \label{classTicTacToe_a341c14c8603d60a93523f657b60a08f9} 
-Tic\+Tac\+Toe::\+\+Tic\+Tac\+Toe (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{other}{}\end{DoxyParamCaption})}
-
-
-
-Конструктор копирования. 
-
-
-\begin{DoxyParams}{Parameters}
-{\em other} & Ссылка на другой объект игры \doxylink{classTicTacToe}{Tic\+Tac\+Toe} для копирования. \\
-\hline
-\end{DoxyParams}
 
 
 \label{doc-func-members}
@@ -142,6 +110,19 @@ char Tic\+Tac\+Toe::\+get\+Cell (\begin{DoxyParamCaption}\item[{int}]{row}{, }\i
 {\em std::\+out\+\_\+of\+\_\+range} & если координаты выходят за пределы поля. \\
 \hline
 \end{DoxyExceptions}
+\Hypertarget{classTicTacToe_a023953c9f86b4113446bf3f2042f2b73}\index{TicTacToe@{TicTacToe}!getCurrentPlayer@{getCurrentPlayer}}
+\index{getCurrentPlayer@{getCurrentPlayer}!TicTacToe@{TicTacToe}}
+\doxysubsubsection{\texorpdfstring{getCurrentPlayer()}{getCurrentPlayer()}}
+{\footnotesize\ttfamily \label{classTicTacToe_a023953c9f86b4113446bf3f2042f2b73} 
+char Tic\+Tac\+Toe::\+get\+Current\+Player (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Возвращает символ игрока, чей ход сейчас. 
+
+\begin{DoxyReturn}{Returns}
+\textquotesingle{}X\textquotesingle{} или \textquotesingle{}O\textquotesingle{}. 
+\end{DoxyReturn}
 \Hypertarget{classTicTacToe_ac4094411e8606fe60630a123d4941827}\index{TicTacToe@{TicTacToe}!getSize@{getSize}}
 \index{getSize@{getSize}!TicTacToe@{TicTacToe}}
 \doxysubsubsection{\texorpdfstring{getSize()}{getSize()}}
@@ -192,7 +173,7 @@ true, если координаты в пределах поля и ячейка
 \index{operator"!=@{operator"!=}!TicTacToe@{TicTacToe}}
 \doxysubsubsection{\texorpdfstring{operator"!=()}{operator!=()}}
 {\footnotesize\ttfamily \label{classTicTacToe_a1bcefa7f1da162fdb97527559645b1e2} 
-bool Tic\+Tac\+Toe::\+operator!= (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{other}{}\end{DoxyParamCaption}) const}
+bool Tic\+Tac\+Toe::\+operator!= (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{other}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
 
 
 
@@ -205,24 +186,6 @@ bool Tic\+Tac\+Toe::\+operator!= (\begin{DoxyParamCaption}\item[{const \doxymbox
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
 true, если игры отличаются, иначе false. 
-\end{DoxyReturn}
-\Hypertarget{classTicTacToe_aab5bcbf7d501d8bb11bcb1c3a1512369}\index{TicTacToe@{TicTacToe}!operator=@{operator=}}
-\index{operator=@{operator=}!TicTacToe@{TicTacToe}}
-\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
-{\footnotesize\ttfamily \label{classTicTacToe_aab5bcbf7d501d8bb11bcb1c3a1512369} 
-\doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \& Tic\+Tac\+Toe::\+operator= (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{classTicTacToe}{Tic\+Tac\+Toe}} \&}]{other}{}\end{DoxyParamCaption})}
-
-
-
-Оператор присваивания копированием. 
-
-
-\begin{DoxyParams}{Parameters}
-{\em other} & Ссылка на другой объект игры \doxylink{classTicTacToe}{Tic\+Tac\+Toe}. \\
-\hline
-\end{DoxyParams}
-\begin{DoxyReturn}{Returns}
-Ссылка на текущий измененный объект. 
 \end{DoxyReturn}
 \Hypertarget{classTicTacToe_adeab7fcf93aca5e58d1ec215657b0260}\index{TicTacToe@{TicTacToe}!operator==@{operator==}}
 \index{operator==@{operator==}!TicTacToe@{TicTacToe}}
@@ -263,7 +226,9 @@ void Tic\+Tac\+Toe::\+set\+Move (\begin{DoxyParamCaption}\item[{int}]{row}{, }\i
 \end{DoxyParams}
 
 \begin{DoxyExceptions}{Exceptions}
-{\em std::\+out\+\_\+of\+\_\+range} & если ход невалидный (ячейка занята или вне границ). \\
+{\em std::\+invalid\+\_\+argument} & если mark не \textquotesingle{}X\textquotesingle{} и не \textquotesingle{}O\textquotesingle{}, либо ячейка уже занята. \\
+\hline
+{\em std::\+out\+\_\+of\+\_\+range} & если координаты выходят за пределы поля. \\
 \hline
 \end{DoxyExceptions}
 
@@ -281,7 +246,7 @@ std::\+ostream \& operator$<$$<$ (\begin{DoxyParamCaption}\item[{std::\+ostream 
 
 Перегрузка оператора вывода игры в поток. 
 
-
+Формат:\+ "{}$<$size$>$ $<$current\+Player$>$"{}, затем size строк по size символов через пробел. Пустая ячейка выводится как \textquotesingle{}.\textquotesingle{}. 
 \begin{DoxyParams}{Parameters}
 {\em os} & Поток вывода. \\
 \hline
@@ -301,7 +266,7 @@ std::\+istream \& operator$>$$>$ (\begin{DoxyParamCaption}\item[{std::\+istream 
 
 Перегрузка оператора ввода игры из потока. 
 
-
+Ожидает формат, который выводит operator\texorpdfstring{$<$}{<}\texorpdfstring{$<$}{<}. При некорректных данных (размер вне 1..100, неизвестный игрок или символ ячейки, обрыв потока) выставляет failbit и не изменяет game. 
 \begin{DoxyParams}{Parameters}
 {\em is} & Поток ввода. \\
 \hline

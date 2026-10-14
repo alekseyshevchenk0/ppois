@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(TicTacToeLab)
-
+option(ENABLE_COVERAGE "Enable code coverage analysis" ON)
+if(ENABLE_COVERAGE AND CMAKE_BUILD_TYPE MATCHES Debug)
+    add_compile_options(--coverage -O0 -g)
+    add_link_options(--coverage)
+endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
