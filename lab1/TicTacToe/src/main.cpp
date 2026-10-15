@@ -1,120 +1,159 @@
 #include <iostream>
 #include <limits>
-#include "tictactoe.hpp"
+#include <string>
+#include "../include/tictactoe.hpp"
 
 namespace {
+
+constexpr int MENU_NEW_GAME = 1;
+constexpr int MENU_EXIT = 2;
+constexpr int USER_INDEX_OFFSET = 1;
+constexpr const char* CELL_BORDER = "----";
+
+int toUserNumber(int boardIndex) {
+    return boardIndex + USER_INDEX_OFFSET;
+}
+
+int toBoardIndex(int userNumber) {
+    return userNumber - USER_INDEX_OFFSET;
+}
 
 void clearInput() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
+void reportInputFailure(const std::string& message) {
+    if (std::cin.eof()) return;
+    std::cout << message << "\n";
+    clearInput();
+}
+
+void printColumnNumbers(int size) {
+    std::cout << "\n    ";
+    for (int col = 0; col < size; ++col) {
+        std::cout << toUserNumber(col) << "   ";
+    }
+    std::cout << "\n";
+}
+
+void printSeparator(int size) {
+    std::cout << "   ";
+    for (int col = 0; col < size; ++col) {
+        std::cout << CELL_BORDER;
+    }
+    std::cout << "-\n";
+}
+
+void printRow(const TicTacToe& game, int row) {
+    std::cout << " " << toUserNumber(row) << " ";
+    for (int col = 0; col < game.getSize(); ++col) {
+        std::cout << "| " << game.getCell(row, col) << " ";
+    }
+    std::cout << "|\n";
 }
 
 void printBoard(const TicTacToe& game) {
-    int size = game.getSize();
-    std::cout << "\n    ";
-    for (int j = 0; j < size; ++j) {
-        std::cout << j + 1 << "   ";
+    printColumnNumbers(game.getSize());
+    for (int row = 0; row < game.getSize(); ++row) {
+        printSeparator(game.getSize());
+        printRow(game, row);
     }
+    printSeparator(game.getSize());
     std::cout << "\n";
-    for (int i = 0; i < size; ++i) {
-        std::cout << "   ";
-        for (int j = 0; j < size; ++j) {
-            std::cout << "----";
-        }
-        std::cout << "-\n";
-        std::cout << " " << i + 1 << " ";
-        for (int j = 0; j < size; ++j) {
-            std::cout << "| " << game.getCell(i, j) << " ";
-        }
-        std::cout << "|\n";
+}
+
+bool readBoardSize(int& size) {
+    std::cout << "Введите размер поля (например, 3 для 3x3): ";
+    if (std::cin >> size && size > 0) return true;
+    if (std::cin.eof()) return false;
+    std::cout << "Некорректный размер, устанавливается значение по умолчанию: " << TicTacToe::DEFAULT_SIZE << ".\n";
+    clearInput();
+    size = TicTacToe::DEFAULT_SIZE;
+    return true;
+}
+
+bool announceIfFinished(const TicTacToe& game) {
+    const char winner = game.checkWinner();
+    if (winner != TicTacToe::EMPTY_CELL) {
+        std::cout << "Поздравляем. Победил игрок: " << winner << "!\n";
+        return true;
     }
-    std::cout << "   ";
-    for (int j = 0; j < size; ++j) {
-        std::cout << "----";
+    if (game.isBoardFull()) {
+        std::cout << "Ничья. Свободные клетки закончились\n";
+        return true;
     }
-    std::cout << "-\n\n";
+    return false;
+}
+
+void applyMove(TicTacToe& game, int row, int col) {
+    if (!game.isValidMove(row, col)) {
+        std::cout << "Неверный ход. Клетка уже занята или выходит за пределы поля. Попробуйте снова\n";
+        return;
+    }
+    game.setMove(row, col, game.getCurrentPlayer());
+}
+
+bool playTurn(TicTacToe& game) {
+    int userRow = 0;
+    int userCol = 0;
+    std::cout << "Ходит '" << game.getCurrentPlayer() << "'. Введите строку и столбец (через пробел, от "
+              << toUserNumber(0) << " до " << game.getSize() << "): ";
+    if (!(std::cin >> userRow >> userCol)) {
+        reportInputFailure("Ошибка ввода. Пожалуйста, вводите числа");
+        return !std::cin.eof();
+    }
+    applyMove(game, toBoardIndex(userRow), toBoardIndex(userCol));
+    return true;
 }
 
 void playTicTacToe() {
-    int size = 3;
-    std::cout << "Введите размер поля (например, 3 для 3x3): ";
-    if (!(std::cin >> size) || size <= 0) {
-        if (std::cin.eof()) return;
-        std::cout << "Некорректный размер, устанавливается значение по умолчанию: 3.\n";
-        clearInput();
-        size = 3;
-    }
+    int size = 0;
+    if (!readBoardSize(size)) return;
 
     TicTacToe game(size);
-    std::cout << "\nИгра началась. Первым ходит крестик (X).\n";
-
+    std::cout << "\nИгра началась. Первым ходит крестик (" << TicTacToe::PLAYER_X << ").\n";
     while (true) {
         printBoard(game);
-
-        char winner = game.checkWinner();
-        if (winner != ' ') {
-            std::cout << "Поздравляем. Победил игрок: " << winner << "!\n";
-            break;
-        }
-
-        if (game.isBoardFull()) {
-            std::cout << "Ничья. Свободные клетки закончились\n";
-            break;
-        }
-
-        char mark = game.getCurrentPlayer();
-        int row, col;
-        std::cout << "Ходит '" << mark << "'. Введите строку и столбец (через пробел, от 1 до "
-                  << size << "): ";
-
-        if (!(std::cin >> row >> col)) {
-            if (std::cin.eof()) return;
-            std::cout << "Ошибка ввода. Пожалуйста, вводите числа\n";
-            clearInput();
-            continue;
-        }
-        --row;
-        --col;
-
-        if (game.isValidMove(row, col)) {
-            game.setMove(row, col, mark);
-        } else {
-            std::cout << "Неверный ход. Клетка уже занята или выходит за пределы поля. Попробуйте снова\n";
-        }
+        if (announceIfFinished(game)) return;
+        if (!playTurn(game)) return;
     }
 }
 
-int main() {
-    int choice = 0;
-    do {
-        std::cout << "МЕНЮ КРЕСТИКИ-НОЛИКИ\n";
-        std::cout << "1. Начать новую игру\n";
-        std::cout << "2. Выход\n";
-        std::cout << "Выберите пункт меню: ";
+void printMenu() {
+    std::cout << "МЕНЮ КРЕСТИКИ-НОЛИКИ\n"
+              << MENU_NEW_GAME << ". Начать новую игру\n"
+              << MENU_EXIT << ". Выход\n"
+              << "Выберите пункт меню: ";
+}
 
+bool executeChoice(int choice) {
+    switch (choice) {
+        case MENU_NEW_GAME:
+            playTicTacToe();
+            return true;
+        case MENU_EXIT:
+            std::cout << "Выход из программы\n";
+            return false;
+        default:
+            std::cout << "Неверный пункт меню, попробуйте снова\n";
+            return true;
+    }
+}
+
+}
+
+int main() {
+    bool running = true;
+    while (running && !std::cin.eof()) {
+        printMenu();
+        int choice = 0;
         if (!(std::cin >> choice)) {
-            if (std::cin.eof()) break;
-            std::cout << "Некорректный ввод\n";
-            clearInput();
+            reportInputFailure("Некорректный ввод");
             continue;
         }
-
-        switch (choice) {
-            case 1:
-                playTicTacToe();
-                break;
-            case 2:
-                std::cout << "Выход из программы\n";
-                break;
-            default:
-                std::cout << "Неверный пункт меню, попробуйте снова\n";
-        }
-
-        if (std::cin.eof()) break;
+        running = executeChoice(choice);
         std::cout << "\n";
-    } while (choice != 2);
-
+    }
     return 0;
 }

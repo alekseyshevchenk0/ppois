@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_7etictactoe_0',['~TicTacToe',['../classTicTacToe.html#a5ea5286d4122bb05bad38823dc7bd49a',1,'TicTacToe']]]
+  ['linewinner_0',['lineWinner',['../classTicTacToe.html#a97f0984eb2d9faca1d021bb72df38192',1,'TicTacToe']]]
 ];

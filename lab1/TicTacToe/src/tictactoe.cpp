@@ -1,131 +1,162 @@
-#include "tictactoe.hpp"
+#include "../include/tictactoe.hpp"
 
 #include <istream>
 #include <ostream>
 #include <stdexcept>
+#include <utility>
 
 namespace {
+
+using Board = std::vector<std::vector<char>>;
+
+constexpr char FILE_EMPTY_CELL = '.';
 constexpr int MAX_SIZE_FROM_STREAM = 100;
+
+bool isPlayerMark(char mark) {
+    return mark == TicTacToe::PLAYER_X || mark == TicTacToe::PLAYER_O;
 }
 
-TicTacToe::TicTacToe(int boardSize) : size(boardSize), currentPlayer('X') {
+bool isValidHeader(int size, char player) {
+    return size > 0 && size <= MAX_SIZE_FROM_STREAM && isPlayerMark(player);
+}
+
+bool parseCell(char symbol, char& cell) {
+    if (symbol == FILE_EMPTY_CELL) {
+        cell = TicTacToe::EMPTY_CELL;
+        return true;
+    }
+    if (!isPlayerMark(symbol)) return false;
+    cell = symbol;
+    return true;
+}
+
+bool readBoard(std::istream& input, int size, Board& board) {
+    board.assign(size, std::vector<char>(size, TicTacToe::EMPTY_CELL));
+    for (auto& row : board) {
+        for (char& cell : row) {
+            char symbol;
+            if (!(input >> symbol)) return false;
+            if (parseCell(symbol, cell)) continue;
+            input.setstate(std::ios::failbit);
+            return false;
+        }
+    }
+    return true;
+}
+
+}
+
+TicTacToe::TicTacToe(int boardSize) : size_(boardSize), currentPlayer_(PLAYER_X) {
     if (boardSize <= 0) {
         throw std::invalid_argument("Размер доски должен быть больше 0");
     }
-    board.assign(size, std::vector<char>(size, EMPTY));
+    board_.assign(size_, std::vector<char>(size_, EMPTY_CELL));
 }
 
 bool TicTacToe::inBounds(int row, int col) const {
-    return row >= 0 && row < size && col >= 0 && col < size;
+    return row >= 0 && row < size_ && col >= 0 && col < size_;
 }
 
 bool TicTacToe::isValidMove(int row, int col) const {
-    return inBounds(row, col) && board[row][col] == EMPTY;
+    return inBounds(row, col) && board_[row][col] == EMPTY_CELL;
 }
 
 void TicTacToe::setMove(int row, int col, char mark) {
-    if (mark != 'X' && mark != 'O') {
+    if (!isPlayerMark(mark)) {
         throw std::invalid_argument("Знак должен быть 'X' или 'O'");
     }
     if (!inBounds(row, col)) {
         throw std::out_of_range("Координаты выходят за пределы доски");
     }
-    if (board[row][col] != EMPTY) {
+    if (board_[row][col] != EMPTY_CELL) {
         throw std::invalid_argument("Клетка уже занята");
     }
-    board[row][col] = mark;
-    currentPlayer = (mark == 'X') ? 'O' : 'X';
+    board_[row][col] = mark;
+    currentPlayer_ = (mark == PLAYER_X) ? PLAYER_O : PLAYER_X;
 }
 
 char TicTacToe::getCell(int row, int col) const {
     if (!inBounds(row, col)) {
         throw std::out_of_range("Координаты выходят за пределы допустимого диапазона");
     }
-    return board[row][col];
+    return board_[row][col];
+}
+
+char TicTacToe::lineWinner(int startRow, int startCol, int rowStep, int colStep) const {
+    const char firstCell = board_[startRow][startCol];
+    if (firstCell == EMPTY_CELL) return EMPTY_CELL;
+    for (int offset = 1; offset < size_; ++offset) {
+        if (board_[startRow + offset * rowStep][startCol + offset * colStep] != firstCell) {
+            return EMPTY_CELL;
+        }
+    }
+    return firstCell;
 }
 
 char TicTacToe::checkWinner() const {
-    auto lineWinner = [this](int r0, int c0, int dr, int dc) -> char {
-        char first = board[r0][c0];
-        if (first == EMPTY) return EMPTY;
-        for (int k = 1; k < size; ++k) {
-            if (board[r0 + k * dr][c0 + k * dc] != first) return EMPTY;
-        }
-        return first;
-    };
-
-    for (int i = 0; i < size; ++i) {
-        if (char w = lineWinner(i, 0, 0, 1); w != EMPTY) return w;
-        if (char w = lineWinner(0, i, 1, 0); w != EMPTY) return w;
+    for (int index = 0; index < size_; ++index) {
+        const char rowWinner = lineWinner(index, 0, 0, 1);
+        if (rowWinner != EMPTY_CELL) return rowWinner;
+        const char columnWinner = lineWinner(0, index, 1, 0);
+        if (columnWinner != EMPTY_CELL) return columnWinner;
     }
-    if (char w = lineWinner(0, 0, 1, 1); w != EMPTY) return w; 
-    if (char w = lineWinner(0, size - 1, 1, -1); w != EMPTY) return w;
-
-    return EMPTY;
+    const char mainDiagonalWinner = lineWinner(0, 0, 1, 1);
+    if (mainDiagonalWinner != EMPTY_CELL) return mainDiagonalWinner;
+    return lineWinner(0, size_ - 1, 1, -1);
 }
 
 bool TicTacToe::isBoardFull() const {
-    for (const auto& row : board) {
-        for (char c : row) {
-            if (c == EMPTY) return false;
+    for (const auto& row : board_) {
+        for (char cell : row) {
+            if (cell == EMPTY_CELL) return false;
         }
     }
     return true;
 }
 
 int TicTacToe::getSize() const {
-    return size;
+    return size_;
 }
 
 char TicTacToe::getCurrentPlayer() const {
-    return currentPlayer;
+    return currentPlayer_;
 }
 
 bool TicTacToe::operator==(const TicTacToe& other) const {
-    return size == other.size && currentPlayer == other.currentPlayer && board == other.board;
+    return size_ == other.size_ && currentPlayer_ == other.currentPlayer_ && board_ == other.board_;
 }
 
-std::ostream& operator<<(std::ostream& os, const TicTacToe& game) {
-    os << game.size << ' ' << game.currentPlayer << '\n';
-    for (int i = 0; i < game.size; ++i) {
-        for (int j = 0; j < game.size; ++j) {
-            char c = game.board[i][j];
-            os << (c == TicTacToe::EMPTY ? TicTacToe::FILE_EMPTY : c);
-            if (j + 1 < game.size) os << ' ';
+bool TicTacToe::operator!=(const TicTacToe& other) const {
+    return !(*this == other);
+}
+
+std::ostream& operator<<(std::ostream& output, const TicTacToe& game) {
+    output << game.size_ << ' ' << game.currentPlayer_ << '\n';
+    for (const auto& row : game.board_) {
+        for (int col = 0; col < game.size_; ++col) {
+            output << (row[col] == TicTacToe::EMPTY_CELL ? FILE_EMPTY_CELL : row[col]);
+            if (col + 1 < game.size_) output << ' ';
         }
-        os << '\n';
+        output << '\n';
     }
-    return os;
+    return output;
 }
 
-std::istream& operator>>(std::istream& is, TicTacToe& game) {
+std::istream& operator>>(std::istream& input, TicTacToe& game) {
     int newSize;
     char newPlayer;
-    if (!(is >> newSize >> newPlayer)) return is;
+    if (!(input >> newSize >> newPlayer)) return input;
 
-    if (newSize <= 0 || newSize > MAX_SIZE_FROM_STREAM ||
-        (newPlayer != 'X' && newPlayer != 'O')) {
-        is.setstate(std::ios::failbit);
-        return is;
+    if (!isValidHeader(newSize, newPlayer)) {
+        input.setstate(std::ios::failbit);
+        return input;
     }
 
-    std::vector<std::vector<char>> newBoard(newSize, std::vector<char>(newSize, TicTacToe::EMPTY));
-    for (int i = 0; i < newSize; ++i) {
-        for (int j = 0; j < newSize; ++j) {
-            char c;
-            if (!(is >> c)) return is;
-            if (c == TicTacToe::FILE_EMPTY) {
-                newBoard[i][j] = TicTacToe::EMPTY;
-            } else if (c == 'X' || c == 'O') {
-                newBoard[i][j] = c;
-            } else {
-                is.setstate(std::ios::failbit);
-                return is;
-            }
-        }
-    }
-    game.size = newSize;
-    game.currentPlayer = newPlayer;
-    game.board = std::move(newBoard);
-    return is;
+    Board newBoard;
+    if (!readBoard(input, newSize, newBoard)) return input;
+
+    game.size_ = newSize;
+    game.currentPlayer_ = newPlayer;
+    game.board_ = std::move(newBoard);
+    return input;
 }

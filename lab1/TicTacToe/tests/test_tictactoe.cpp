@@ -6,42 +6,52 @@
 #include "../include/tictactoe.hpp"
 
 namespace {
+
 TicTacToe makeBoard(const std::vector<std::string>& rows) {
     TicTacToe game(static_cast<int>(rows.size()));
-    for (int i = 0; i < static_cast<int>(rows.size()); ++i) {
-        for (int j = 0; j < static_cast<int>(rows[i].size()); ++j) {
-            if (rows[i][j] != '.') game.setMove(i, j, rows[i][j]);
+    for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
+        for (int col = 0; col < static_cast<int>(rows[row].size()); ++col) {
+            if (rows[row][col] != '.') game.setMove(row, col, rows[row][col]);
         }
     }
     return game;
 }
 
+std::string emptyBoardText(int size) {
+    std::string text = std::to_string(size) + " X\n";
+    for (int row = 0; row < size; ++row) {
+        for (int col = 0; col < size; ++col) text += (col ? " ." : ".");
+        text += "\n";
+    }
+    return text;
 }
+
+}  
 
 TEST(TicTacToeTest, Initialization) {
     TicTacToe game(3);
     EXPECT_EQ(game.getSize(), 3);
-    EXPECT_EQ(game.getCurrentPlayer(), 'X');
-    EXPECT_EQ(game.checkWinner(), ' ');
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_X);
+    EXPECT_EQ(game.checkWinner(), TicTacToe::EMPTY_CELL);
     EXPECT_FALSE(game.isBoardFull());
 
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            EXPECT_EQ(game.getCell(i, j), ' ');
+    for (int row = 0; row < 3; ++row) {
+        for (int col = 0; col < 3; ++col) {
+            EXPECT_EQ(game.getCell(row, col), TicTacToe::EMPTY_CELL);
         }
     }
 }
 
 TEST(TicTacToeTest, DefaultConstructor) {
     TicTacToe game;
-    EXPECT_EQ(game.getSize(), 3);
-    EXPECT_EQ(game.getCurrentPlayer(), 'X');
+    EXPECT_EQ(game.getSize(), TicTacToe::DEFAULT_SIZE);
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_X);
 }
 
 TEST(TicTacToeTest, CustomSize) {
     TicTacToe game(5);
     EXPECT_EQ(game.getSize(), 5);
-    EXPECT_EQ(game.getCell(4, 4), ' ');
+    EXPECT_EQ(game.getCell(4, 4), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, InvalidSizeException) {
@@ -70,19 +80,19 @@ TEST(TicTacToeTest, IsValidMoveOutOfBounds) {
 
 TEST(TicTacToeTest, SetMoveSwitchesCurrentPlayer) {
     TicTacToe game(3);
-    EXPECT_EQ(game.getCurrentPlayer(), 'X');
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_X);
     game.setMove(0, 0, 'X');
-    EXPECT_EQ(game.getCurrentPlayer(), 'O');
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_O);
     game.setMove(1, 1, 'O');
-    EXPECT_EQ(game.getCurrentPlayer(), 'X');
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_X);
 }
 
 TEST(TicTacToeTest, SetMoveInvalidMark) {
     TicTacToe game(3);
     EXPECT_THROW(game.setMove(0, 0, 'Z'), std::invalid_argument);
     EXPECT_THROW(game.setMove(0, 0, ' '), std::invalid_argument);
-    EXPECT_EQ(game.getCell(0, 0), ' ');
-    EXPECT_EQ(game.getCurrentPlayer(), 'X');
+    EXPECT_EQ(game.getCell(0, 0), TicTacToe::EMPTY_CELL);
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_X);
 }
 
 TEST(TicTacToeTest, SetMoveOccupiedCell) {
@@ -90,7 +100,7 @@ TEST(TicTacToeTest, SetMoveOccupiedCell) {
     game.setMove(0, 0, 'X');
     EXPECT_THROW(game.setMove(0, 0, 'O'), std::invalid_argument);
     EXPECT_EQ(game.getCell(0, 0), 'X');
-    EXPECT_EQ(game.getCurrentPlayer(), 'O');
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_O);
 }
 
 TEST(TicTacToeTest, SetMoveOutOfRange) {
@@ -112,21 +122,21 @@ TEST(TicTacToeTest, GetCellOutOfRange) {
 }
 
 TEST(TicTacToeTest, RowWinner) {
-    for (int r = 0; r < 3; ++r) {
+    for (int row = 0; row < 3; ++row) {
         for (char mark : {'X', 'O'}) {
             TicTacToe game(3);
-            for (int c = 0; c < 3; ++c) game.setMove(r, c, mark);
-            EXPECT_EQ(game.checkWinner(), mark) << "row " << r;
+            for (int col = 0; col < 3; ++col) game.setMove(row, col, mark);
+            EXPECT_EQ(game.checkWinner(), mark) << "row " << row;
         }
     }
 }
 
 TEST(TicTacToeTest, ColumnWinner) {
-    for (int c = 0; c < 3; ++c) {
+    for (int col = 0; col < 3; ++col) {
         for (char mark : {'X', 'O'}) {
             TicTacToe game(3);
-            for (int r = 0; r < 3; ++r) game.setMove(r, c, mark);
-            EXPECT_EQ(game.checkWinner(), mark) << "col " << c;
+            for (int row = 0; row < 3; ++row) game.setMove(row, col, mark);
+            EXPECT_EQ(game.checkWinner(), mark) << "col " << col;
         }
     }
 }
@@ -149,35 +159,35 @@ TEST(TicTacToeTest, AntiDiagonalWinner) {
 
 TEST(TicTacToeTest, NoWinnerOnEmptyBoard) {
     TicTacToe game(4);
-    EXPECT_EQ(game.checkWinner(), ' ');
+    EXPECT_EQ(game.checkWinner(), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, NoWinnerOnIncompleteLines) {
-    EXPECT_EQ(makeBoard({"XX.", "...", "..."}).checkWinner(), ' ');
-    EXPECT_EQ(makeBoard({".XX", "...", "..."}).checkWinner(), ' ');
-    EXPECT_EQ(makeBoard({"X.X", "...", "..."}).checkWinner(), ' ');
+    EXPECT_EQ(makeBoard({"XX.", "...", "..."}).checkWinner(), TicTacToe::EMPTY_CELL);
+    EXPECT_EQ(makeBoard({".XX", "...", "..."}).checkWinner(), TicTacToe::EMPTY_CELL);
+    EXPECT_EQ(makeBoard({"X.X", "...", "..."}).checkWinner(), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, NoWinnerOnMixedLines) {
-    EXPECT_EQ(makeBoard({"XXO", "...", "..."}).checkWinner(), ' ');
-    EXPECT_EQ(makeBoard({"X..", "O..", "X.."}).checkWinner(), ' ');
-    EXPECT_EQ(makeBoard({"X..", ".O.", "..X"}).checkWinner(), ' ');
-    EXPECT_EQ(makeBoard({"..X", ".O.", "X.."}).checkWinner(), ' ');
+    EXPECT_EQ(makeBoard({"XXO", "...", "..."}).checkWinner(), TicTacToe::EMPTY_CELL);
+    EXPECT_EQ(makeBoard({"X..", "O..", "X.."}).checkWinner(), TicTacToe::EMPTY_CELL);
+    EXPECT_EQ(makeBoard({"X..", ".O.", "..X"}).checkWinner(), TicTacToe::EMPTY_CELL);
+    EXPECT_EQ(makeBoard({"..X", ".O.", "X.."}).checkWinner(), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, WinnerOnLargerBoard) {
-    TicTacToe game(4);
-    for (int i = 0; i < 4; ++i) game.setMove(i, 3 - i, 'O');
-    EXPECT_EQ(game.checkWinner(), 'O');
+    TicTacToe fullLine(4);
+    for (int index = 0; index < 4; ++index) fullLine.setMove(index, 3 - index, 'O');
+    EXPECT_EQ(fullLine.checkWinner(), 'O');
 
-    TicTacToe almost(4);
-    for (int i = 0; i < 3; ++i) almost.setMove(1, i, 'X');
-    EXPECT_EQ(almost.checkWinner(), ' ');
+    TicTacToe almostLine(4);
+    for (int col = 0; col < 3; ++col) almostLine.setMove(1, col, 'X');
+    EXPECT_EQ(almostLine.checkWinner(), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, SingleCellBoard) {
     TicTacToe game(1);
-    EXPECT_EQ(game.checkWinner(), ' ');
+    EXPECT_EQ(game.checkWinner(), TicTacToe::EMPTY_CELL);
     EXPECT_FALSE(game.isBoardFull());
     game.setMove(0, 0, 'X');
     EXPECT_EQ(game.checkWinner(), 'X');
@@ -196,133 +206,127 @@ TEST(TicTacToeTest, BoardFullDraw) {
                                 "XOX",
                                 "OXO"});
     EXPECT_TRUE(game.isBoardFull());
-    EXPECT_EQ(game.checkWinner(), ' ');
+    EXPECT_EQ(game.checkWinner(), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, CopyAndAssign) {
-    TicTacToe game1(3);
-    game1.setMove(0, 0, 'X');
+    TicTacToe original(3);
+    original.setMove(0, 0, 'X');
 
-    TicTacToe game2(game1);
-    EXPECT_EQ(game1, game2);
+    TicTacToe copied(original);
+    EXPECT_EQ(original, copied);
 
-    TicTacToe game3;
-    game3 = game1;
-    EXPECT_TRUE(game1 == game3);
-    EXPECT_FALSE(game1 != game3);
+    TicTacToe assigned;
+    assigned = original;
+    EXPECT_TRUE(original == assigned);
+    EXPECT_FALSE(original != assigned);
 
-    game2.setMove(1, 1, 'O');
-    EXPECT_NE(game1, game2);
-    EXPECT_EQ(game1.getCell(1, 1), ' ');
+    copied.setMove(1, 1, 'O');
+    EXPECT_NE(original, copied);
+    EXPECT_EQ(original.getCell(1, 1), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, SelfAssign) {
     TicTacToe game(3);
     game.setMove(0, 0, 'X');
-    TicTacToe& ref = game;
-    game = ref;
+    TicTacToe& sameGame = game;
+    game = sameGame;
     EXPECT_EQ(game.getCell(0, 0), 'X');
     EXPECT_EQ(game.getSize(), 3);
 }
 
-TEST(TicTacToeTest, EqualityDetectsDifferences) {
-    TicTacToe a(3), b(3);
-    EXPECT_TRUE(a == b);
+TEST(TicTacToeTest, EqualityDetectsDifferentSize) {
+    EXPECT_TRUE(TicTacToe(3) == TicTacToe(3));
+    EXPECT_FALSE(TicTacToe(3) == TicTacToe(4));
+    EXPECT_TRUE(TicTacToe(3) != TicTacToe(4));
+}
 
-    EXPECT_FALSE(a == TicTacToe(4));
-    EXPECT_TRUE(a != TicTacToe(4));
+TEST(TicTacToeTest, EqualityDetectsDifferentCurrentPlayer) {
+    TicTacToe xMovedFirst(3);
+    TicTacToe oMovedFirst(3);
+    xMovedFirst.setMove(0, 0, 'X');
+    oMovedFirst.setMove(0, 0, 'O');
+    EXPECT_NE(xMovedFirst, oMovedFirst);
+}
 
-
-    TicTacToe c(3), d(3);
-    c.setMove(0, 0, 'X');
-    d.setMove(0, 0, 'O');
-    EXPECT_NE(c, d);
-
-
-    TicTacToe e(3), f(3);
-    e.setMove(0, 0, 'X');
-    f.setMove(0, 1, 'X');
-    EXPECT_NE(e, f);
+TEST(TicTacToeTest, EqualityDetectsDifferentCells) {
+    TicTacToe movedToCorner(3);
+    TicTacToe movedToEdge(3);
+    movedToCorner.setMove(0, 0, 'X');
+    movedToEdge.setMove(0, 1, 'X');
+    EXPECT_NE(movedToCorner, movedToEdge);
 }
 
 TEST(TicTacToeTest, OutputFormat) {
     TicTacToe game(2);
     game.setMove(0, 1, 'X');
 
-    std::ostringstream os;
-    os << game;
-    EXPECT_EQ(os.str(), "2 O\n. X\n. .\n");
+    std::ostringstream output;
+    output << game;
+    EXPECT_EQ(output.str(), "2 O\n. X\n. .\n");
 }
 
-
 TEST(TicTacToeTest, StreamOperators) {
-    TicTacToe game1(3);
-    game1.setMove(0, 0, 'X');
+    TicTacToe original(3);
+    original.setMove(0, 0, 'X');
 
-    std::stringstream ss;
-    ss << game1;
+    std::stringstream stream;
+    stream << original;
 
-    TicTacToe game2;
-    ss >> game2;
-    EXPECT_TRUE(ss);
-    EXPECT_EQ(game1, game2);
+    TicTacToe loaded;
+    stream >> loaded;
+    EXPECT_TRUE(stream);
+    EXPECT_EQ(original, loaded);
 }
 
 TEST(TicTacToeTest, StreamRoundTripKeepsEmptyCells) {
-
-    TicTacToe game = makeBoard({"X..",
-                                ".O.",
-                                "..X"});
-    std::stringstream ss;
-    ss << game;
+    TicTacToe original = makeBoard({"X..",
+                                    ".O.",
+                                    "..X"});
+    std::stringstream stream;
+    stream << original;
 
     TicTacToe loaded;
-    ss >> loaded;
-    EXPECT_TRUE(ss);
-    EXPECT_EQ(game, loaded);
-    EXPECT_EQ(loaded.getCell(0, 1), ' ');
+    stream >> loaded;
+    EXPECT_TRUE(stream);
+    EXPECT_EQ(original, loaded);
+    EXPECT_EQ(loaded.getCell(0, 1), TicTacToe::EMPTY_CELL);
     EXPECT_EQ(loaded.getCell(1, 1), 'O');
     EXPECT_EQ(loaded.getCell(2, 2), 'X');
 }
 
 TEST(TicTacToeTest, StreamChangesSize) {
-    TicTacToe big(5);
-    big.setMove(4, 4, 'X');
-    std::stringstream ss;
-    ss << big;
+    TicTacToe bigGame(5);
+    bigGame.setMove(4, 4, 'X');
+    std::stringstream stream;
+    stream << bigGame;
 
     TicTacToe game(3);
-    ss >> game;
+    stream >> game;
     EXPECT_EQ(game.getSize(), 5);
     EXPECT_EQ(game.getCell(4, 4), 'X');
-    EXPECT_EQ(game.getCurrentPlayer(), 'O');
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_O);
 }
 
 TEST(TicTacToeTest, StreamReadsFromLiteral) {
-    std::istringstream is("3 O\nX . .\n. O .\n. . X\n");
+    std::istringstream input("3 O\nX . .\n. O .\n. . X\n");
     TicTacToe game;
-    is >> game;
-    EXPECT_TRUE(is);
-    EXPECT_EQ(game.getCurrentPlayer(), 'O');
+    input >> game;
+    EXPECT_TRUE(input);
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_O);
     EXPECT_EQ(game.getCell(0, 0), 'X');
     EXPECT_EQ(game.getCell(1, 1), 'O');
     EXPECT_EQ(game.getCell(2, 2), 'X');
-    EXPECT_EQ(game.getCell(0, 2), ' ');
+    EXPECT_EQ(game.getCell(0, 2), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, StreamAcceptsMaxSize) {
-    std::string data = "100 X\n";
-    for (int i = 0; i < 100; ++i) {
-        for (int j = 0; j < 100; ++j) data += (j ? " ." : ".");
-        data += "\n";
-    }
-    std::istringstream is(data);
+    std::istringstream input(emptyBoardText(100));
     TicTacToe game;
-    is >> game;
-    EXPECT_TRUE(is);
+    input >> game;
+    EXPECT_TRUE(input);
     EXPECT_EQ(game.getSize(), 100);
 }
-
 
 class StreamFailureTest : public ::testing::TestWithParam<std::string> {};
 
@@ -331,10 +335,10 @@ TEST_P(StreamFailureTest, FailsAndKeepsGameUnchanged) {
     game.setMove(1, 1, 'X');
     const TicTacToe before = game;
 
-    std::istringstream is(GetParam());
-    is >> game;
+    std::istringstream input(GetParam());
+    input >> game;
 
-    EXPECT_TRUE(is.fail());
+    EXPECT_TRUE(input.fail());
     EXPECT_EQ(game, before);
 }
 
@@ -346,11 +350,11 @@ INSTANTIATE_TEST_SUITE_P(
         std::string("3\n"),
         std::string("0 X\n"),
         std::string("-3 X\n"),
-        std::string("101 X\n"), 
+        std::string("101 X\n"),
         std::string("2 Z\n. .\n. .\n"),
         std::string("2 X\n. Q\n. .\n"),
         std::string("2 X\n. .\n.\n"),
-        std::string("3 X\nX O\n")                
+        std::string("3 X\nX O\n")
     ));
 
 int main(int argc, char **argv) {

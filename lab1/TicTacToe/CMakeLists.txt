@@ -1,33 +1,48 @@
-cmake_minimum_required(VERSION 3.10)
-project(TicTacToeLab)
-option(ENABLE_COVERAGE "Enable code coverage analysis" ON)
-if(ENABLE_COVERAGE AND CMAKE_BUILD_TYPE MATCHES Debug)
-    add_compile_options(--coverage -O0 -g)
-    add_link_options(--coverage)
-endif()
+cmake_minimum_required(VERSION 3.20)
+project(TicTacToe LANGUAGES CXX)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+option(BUILD_TESTS "Собирать unit-тесты (нужен GoogleTest)" ON)
+option(ENABLE_COVERAGE "Собирать с инструментацией для gcov (GCC/Clang)" OFF)
 
-add_executable(tictactoe_game 
-    src/main.cpp 
-    src/tictactoe.cpp
-)
-enable_testing()
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
-)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+# --- Библиотека с классом (без консольного интерфейса) ---
+add_library(tictactoe STATIC src/tictactoe.cpp)
+target_include_directories(tictactoe PUBLIC include)
+if(NOT MSVC)
+    target_compile_options(tictactoe PRIVATE -Wall -Wextra)
+endif()
 
-add_executable(tictactoe_tests 
-    tests/test_tictactoe.cpp 
-    src/tictactoe.cpp
-)
-target_link_libraries(tictactoe_tests GTest::gtest_main)
+# --- Консольная программа с меню ---
+add_executable(tictactoe_ui src/main.cpp)
+target_link_libraries(tictactoe_ui PRIVATE tictactoe)
 
-include(GoogleTest)
-gtest_discover_tests(tictactoe_tests)
+# --- Покрытие ---
+if(ENABLE_COVERAGE)
+    target_compile_options(tictactoe PUBLIC --coverage -O0)
+    target_link_options(tictactoe PUBLIC --coverage)
+endif()
+
+# --- Тесты ---
+if(BUILD_TESTS)
+    enable_testing()
+    find_package(GTest REQUIRED)
+    find_package(Threads REQUIRED)
+
+    # В test_tictactoe.cpp есть собственный main, поэтому gtest_main не нужен.
+    add_executable(run_tests tests/test_tictactoe.cpp)
+    target_link_libraries(run_tests PRIVATE tictactoe GTest::gtest Threads::Threads)
+    add_test(NAME tictactoe_tests COMMAND run_tests)
+endif()
+
+# --- Документация (цель docs, если установлен Doxygen); результат в docs/ ---
+find_package(Doxygen QUIET)
+if(DOXYGEN_FOUND)
+    set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/docs")
+    set(DOXYGEN_OUTPUT_LANGUAGE Russian)
+    set(DOXYGEN_EXTRACT_PRIVATE YES)
+    set(DOXYGEN_GENERATE_LATEX NO)
+    doxygen_add_docs(docs include COMMENT "Генерация документации Doxygen")
+endif()
