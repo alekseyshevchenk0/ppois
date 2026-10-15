@@ -5,7 +5,57 @@
 #include <utility>
 
 namespace {
+
+using Coefficients = std::vector<double>;
+
+struct DivisionResult {
+    Coefficients quotient;
+    Coefficients remainder;
+};
+
 constexpr long long MAX_DEGREE_FROM_STREAM = 1000;
+constexpr double ADD_FACTOR = 1.0;
+constexpr double SUBTRACT_FACTOR = -1.0;
+
+void addScaled(Coefficients& target, const Coefficients& source, double factor) {
+    if (source.size() > target.size()) {
+        target.resize(source.size(), 0.0);
+    }
+    for (std::size_t index = 0; index < source.size(); ++index) {
+        target[index] += factor * source[index];
+    }
+}
+
+void subtractShiftedDivisor(Coefficients& remainder, const Coefficients& divisor,
+                            std::size_t shift, double factor) {
+    for (std::size_t index = 0; index < divisor.size(); ++index) {
+        remainder[shift + index] -= factor * divisor[index];
+    }
+}
+
+DivisionResult divideCoefficients(const Coefficients& dividend, const Coefficients& divisor) {
+    if (dividend.size() < divisor.size()) {
+        return {Coefficients(), dividend};
+    }
+    const std::size_t divisorDegree = divisor.size() - 1;
+    Coefficients remainder = dividend;
+    Coefficients quotient(dividend.size() - divisorDegree, 0.0);
+
+    for (std::size_t shift = quotient.size(); shift-- > 0;) {
+        const double factor = remainder[shift + divisorDegree] / divisor.back();
+        quotient[shift] = factor;
+        subtractShiftedDivisor(remainder, divisor, shift, factor);
+    }
+    remainder.resize(divisorDegree);
+    return {quotient, remainder};
+}
+
+void requireNonZeroDivisor(const Polynomial& divisor) {
+    if (divisor.isZero()) {
+        throw std::domain_error("Деление на нулевой многочлен");
+    }
+}
+
 }
 
 Polynomial::Polynomial() : coeffs_(1, 0.0) {}
@@ -42,90 +92,49 @@ double Polynomial::operator[](std::size_t index) const {
     return coeffs_[index];
 }
 
-double Polynomial::operator()(double x) const {
-    double result = 0.0;
-    for (std::size_t i = coeffs_.size(); i-- > 0;) {
-        result = result * x + coeffs_[i];
+double Polynomial::operator()(double argument) const {
+    double value = 0.0;
+    for (std::size_t power = coeffs_.size(); power-- > 0;) {
+        value = value * argument + coeffs_[power];
     }
-    return result;
+    return value;
 }
 
-Polynomial& Polynomial::operator+=(const Polynomial& rhs) {
-    if (rhs.coeffs_.size() > coeffs_.size()) {
-        coeffs_.resize(rhs.coeffs_.size(), 0.0);
-    }
-    for (std::size_t i = 0; i < rhs.coeffs_.size(); ++i) {
-        coeffs_[i] += rhs.coeffs_[i];
-    }
+Polynomial& Polynomial::operator+=(const Polynomial& other) {
+    addScaled(coeffs_, other.coeffs_, ADD_FACTOR);
     normalize();
     return *this;
 }
 
-Polynomial& Polynomial::operator-=(const Polynomial& rhs) {
-    if (rhs.coeffs_.size() > coeffs_.size()) {
-        coeffs_.resize(rhs.coeffs_.size(), 0.0);
-    }
-    for (std::size_t i = 0; i < rhs.coeffs_.size(); ++i) {
-        coeffs_[i] -= rhs.coeffs_[i];
-    }
+Polynomial& Polynomial::operator-=(const Polynomial& other) {
+    addScaled(coeffs_, other.coeffs_, SUBTRACT_FACTOR);
     normalize();
     return *this;
 }
 
-Polynomial& Polynomial::operator*=(const Polynomial& rhs) {
-    std::vector<double> result(coeffs_.size() + rhs.coeffs_.size() - 1, 0.0);
-    for (std::size_t i = 0; i < coeffs_.size(); ++i) {
-        for (std::size_t j = 0; j < rhs.coeffs_.size(); ++j) {
-            result[i + j] += coeffs_[i] * rhs.coeffs_[j];
+Polynomial& Polynomial::operator*=(const Polynomial& other) {
+    Coefficients product(coeffs_.size() + other.coeffs_.size() - 1, 0.0);
+    for (std::size_t left = 0; left < coeffs_.size(); ++left) {
+        for (std::size_t right = 0; right < other.coeffs_.size(); ++right) {
+            product[left + right] += coeffs_[left] * other.coeffs_[right];
         }
     }
-    coeffs_ = std::move(result);
+    coeffs_ = std::move(product);
     normalize();
     return *this;
 }
 
-void Polynomial::divide(const Polynomial& dividend, const Polynomial& divisor,
-                        Polynomial& quotient, Polynomial& remainder) {
-    if (divisor.isZero()) {
-        throw std::domain_error("Деление на нулевой многочлен");
-    }
-
-    if (dividend.degree() < divisor.degree()) {
-        Polynomial rest = dividend;
-        quotient = Polynomial();
-        remainder = std::move(rest);
-        return;
-    }
-
-    const std::size_t divisorDegree = divisor.degree();
-    const std::size_t quotientSize = dividend.degree() - divisorDegree + 1;
-
-    std::vector<double> rem = dividend.coeffs_;
-    std::vector<double> quot(quotientSize, 0.0);
-
-    for (std::size_t k = quotientSize; k-- > 0;) {
-        const double factor = rem[k + divisorDegree] / divisor.coeffs_[divisorDegree];
-        quot[k] = factor;
-        for (std::size_t j = 0; j <= divisorDegree; ++j) {
-            rem[k + j] -= factor * divisor.coeffs_[j];
-        }
-    }
-    rem.resize(divisorDegree);
-    quotient = Polynomial(quot);
-    remainder = Polynomial(rem);
-}
-
-Polynomial& Polynomial::operator/=(const Polynomial& rhs) {
-    Polynomial quotient, remainder;
-    divide(*this, rhs, quotient, remainder);
-    *this = std::move(quotient);
+Polynomial& Polynomial::operator/=(const Polynomial& divisor) {
+    requireNonZeroDivisor(divisor);
+    coeffs_ = divideCoefficients(coeffs_, divisor.coeffs_).quotient;
+    normalize();
     return *this;
 }
 
-Polynomial& Polynomial::operator%=(const Polynomial& rhs) {
-    Polynomial quotient, remainder;
-    divide(*this, rhs, quotient, remainder);
-    *this = std::move(remainder);
+Polynomial& Polynomial::operator%=(const Polynomial& divisor) {
+    requireNonZeroDivisor(divisor);
+    coeffs_ = divideCoefficients(coeffs_, divisor.coeffs_).remainder;
+    normalize();
     return *this;
 }
 
@@ -137,56 +146,56 @@ bool Polynomial::operator!=(const Polynomial& other) const {
     return !(*this == other);
 }
 
-Polynomial operator+(Polynomial lhs, const Polynomial& rhs) {
-    lhs += rhs;
-    return lhs;
+Polynomial operator+(Polynomial left, const Polynomial& right) {
+    left += right;
+    return left;
 }
 
-Polynomial operator-(Polynomial lhs, const Polynomial& rhs) {
-    lhs -= rhs;
-    return lhs;
+Polynomial operator-(Polynomial left, const Polynomial& right) {
+    left -= right;
+    return left;
 }
 
-Polynomial operator*(Polynomial lhs, const Polynomial& rhs) {
-    lhs *= rhs;
-    return lhs;
+Polynomial operator*(Polynomial left, const Polynomial& right) {
+    left *= right;
+    return left;
 }
 
-Polynomial operator/(Polynomial lhs, const Polynomial& rhs) {
-    lhs /= rhs;
-    return lhs;
+Polynomial operator/(Polynomial dividend, const Polynomial& divisor) {
+    dividend /= divisor;
+    return dividend;
 }
 
-Polynomial operator%(Polynomial lhs, const Polynomial& rhs) {
-    lhs %= rhs;
-    return lhs;
+Polynomial operator%(Polynomial dividend, const Polynomial& divisor) {
+    dividend %= divisor;
+    return dividend;
 }
 
-std::ostream& operator<<(std::ostream& os, const Polynomial& p) {
-    const std::streamsize oldPrecision =
-        os.precision(std::numeric_limits<double>::max_digits10);
-    os << p.degree();
-    for (double c : p.coeffs_) {
-        os << ' ' << c;
+std::ostream& operator<<(std::ostream& output, const Polynomial& polynomial) {
+    const std::streamsize previousPrecision =
+        output.precision(std::numeric_limits<double>::max_digits10);
+    output << polynomial.degree();
+    for (double coefficient : polynomial.coeffs_) {
+        output << ' ' << coefficient;
     }
-    os.precision(oldPrecision);
-    return os;
+    output.precision(previousPrecision);
+    return output;
 }
 
-std::istream& operator>>(std::istream& is, Polynomial& p) {
+std::istream& operator>>(std::istream& input, Polynomial& polynomial) {
     long long degree;
-    if (!(is >> degree)) return is;
+    if (!(input >> degree)) return input;
 
     if (degree < 0 || degree > MAX_DEGREE_FROM_STREAM) {
-        is.setstate(std::ios::failbit);
-        return is;
+        input.setstate(std::ios::failbit);
+        return input;
     }
 
-    std::vector<double> coefficients(static_cast<std::size_t>(degree) + 1);
-    for (double& c : coefficients) {
-        if (!(is >> c)) return is;
+    Coefficients coefficients(static_cast<std::size_t>(degree) + 1);
+    for (double& coefficient : coefficients) {
+        if (!(input >> coefficient)) return input;
     }
 
-    p = Polynomial(coefficients);
-    return is;
+    polynomial = Polynomial(coefficients);
+    return input;
 }

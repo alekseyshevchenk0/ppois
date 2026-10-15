@@ -8,36 +8,30 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(BUILD_TESTS "Собирать unit-тесты (нужен GoogleTest)" ON)
 option(ENABLE_COVERAGE "Собирать с инструментацией для gcov (GCC/Clang)" OFF)
 
-# --- Библиотека с классом (без консольного интерфейса) ---
 add_library(tictactoe STATIC src/tictactoe.cpp)
 target_include_directories(tictactoe PUBLIC include)
 if(NOT MSVC)
     target_compile_options(tictactoe PRIVATE -Wall -Wextra)
 endif()
 
-# --- Консольная программа с меню ---
 add_executable(tictactoe_ui src/main.cpp)
 target_link_libraries(tictactoe_ui PRIVATE tictactoe)
 
-# --- Покрытие ---
 if(ENABLE_COVERAGE)
     target_compile_options(tictactoe PUBLIC --coverage -O0)
     target_link_options(tictactoe PUBLIC --coverage)
 endif()
 
-# --- Тесты ---
 if(BUILD_TESTS)
     enable_testing()
     find_package(GTest REQUIRED)
     find_package(Threads REQUIRED)
 
-    # В test_tictactoe.cpp есть собственный main, поэтому gtest_main не нужен.
     add_executable(run_tests tests/test_tictactoe.cpp)
     target_link_libraries(run_tests PRIVATE tictactoe GTest::gtest Threads::Threads)
     add_test(NAME tictactoe_tests COMMAND run_tests)
 endif()
 
-# --- Документация (цель docs, если установлен Doxygen); результат в docs/ ---
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
     set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/docs")
