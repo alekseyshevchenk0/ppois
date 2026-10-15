@@ -3,13 +3,15 @@ name: CI/CD Lab 1
 on:
   push:
     branches:
-      - "main"
-      - "master"
-      - "feature/lab1"
+      - main
+      - master
+      - feature/lab1
     tags:
-      - 'v*'
+      - "v*"
   pull_request:
-    branches: [ "main", "master" ]
+    branches:
+      - main
+      - master
 
 jobs:
   build-and-test:
@@ -24,46 +26,117 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++ lcov cppcheck libgtest-dev
+          sudo apt-get install -y \
+            cmake \
+            g++ \
+            lcov \
+            cppcheck \
+            libgtest-dev
 
       - name: Static Code Analysis (Cppcheck)
         run: |
-          cppcheck --enable=all --error-exitcode=1 lab1/TicTacToe/include/ lab1/TicTacToe/src/ lab1/Polynomial/ || true
+          cppcheck \
+            --enable=all \
+            --error-exitcode=1 \
+            --suppress=missingIncludeSystem \
+            lab1/TicTacToe/include \
+            lab1/TicTacToe/src \
+            lab1/Polynomial/include \
+            lab1/Polynomial/src
 
       - name: Build & Test TicTacToe
         run: |
-          cd lab1/TicTacToe
-          mkdir -p build && cd build
-          cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON ..
-          cmake --build . --config Debug
-          ctest --output-on-failure
+          rm -rf lab1/TicTacToe/build
 
-          lcov --capture --directory . --output-file coverage.info --rc lcov_branch_coverage=1 --ignore-errors mismatch,empty
-          lcov --remove coverage.info '/usr/*' '*/tests/*' '*/_deps/*' --output-file coverage.info --ignore-errors empty,unused
-          lcov --list coverage.info
+          cmake -S lab1/TicTacToe -B lab1/TicTacToe/build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_TESTS=ON \
+            -DENABLE_COVERAGE=ON
+
+          cmake --build lab1/TicTacToe/build --parallel
+
+          ctest \
+            --test-dir lab1/TicTacToe/build \
+            --output-on-failure
+
+          lcov \
+            --capture \
+            --directory lab1/TicTacToe/build \
+            --output-file lab1/TicTacToe/build/coverage.info \
+            --rc lcov_branch_coverage=1
+
+          lcov \
+            --remove lab1/TicTacToe/build/coverage.info \
+            '/usr/*' \
+            '*/tests/*' \
+            '*/_deps/*' \
+            --output-file lab1/TicTacToe/build/coverage_filtered.info \
+            --rc lcov_branch_coverage=1
+
+          lcov \
+            --list lab1/TicTacToe/build/coverage_filtered.info \
+            --rc lcov_branch_coverage=1
 
       - name: Build & Test Polynomial
         run: |
-          cd lab1/Polynomial
-          mkdir -p build && cd build
-          cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON ..
-          cmake --build . --config Debug
-          ctest --output-on-failure
+          rm -rf lab1/Polynomial/build
 
-          lcov --capture --directory . --output-file coverage.info --rc lcov_branch_coverage=1 --ignore-errors mismatch,empty
-          lcov --remove coverage.info '/usr/*' '*/tests/*' '*/_deps/*' --output-file coverage.info --ignore-errors empty,unused
-          lcov --list coverage.info
+          cmake -S lab1/Polynomial -B lab1/Polynomial/build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_TESTS=ON \
+            -DENABLE_COVERAGE=ON
+
+          cmake --build lab1/Polynomial/build --parallel
+
+          ctest \
+            --test-dir lab1/Polynomial/build \
+            --output-on-failure
+
+          lcov \
+            --capture \
+            --directory lab1/Polynomial/build \
+            --output-file lab1/Polynomial/build/coverage.info \
+            --rc lcov_branch_coverage=1
+
+          lcov \
+            --remove lab1/Polynomial/build/coverage.info \
+            '/usr/*' \
+            '*/tests/*' \
+            '*/_deps/*' \
+            --output-file lab1/Polynomial/build/coverage_filtered.info \
+            --rc lcov_branch_coverage=1
+
+          lcov \
+            --list lab1/Polynomial/build/coverage_filtered.info \
+            --rc lcov_branch_coverage=1
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            lab1/TicTacToe/build/coverage_filtered.info
+            lab1/Polynomial/build/coverage_filtered.info
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Package Release Artifacts
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           mkdir -p release_artifacts
-          tar -czf release_artifacts/TicTacToe.tar.gz -C lab1/TicTacToe .
-          tar -czf release_artifacts/Polynomial.tar.gz -C lab1/Polynomial .
+
+          tar -czf release_artifacts/TicTacToe.tar.gz \
+            --exclude=build \
+            -C lab1/TicTacToe .
+
+          tar -czf release_artifacts/Polynomial.tar.gz \
+            --exclude=build \
+            -C lab1/Polynomial .
 
       - name: Publish Release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: release_artifacts/*
         env:
