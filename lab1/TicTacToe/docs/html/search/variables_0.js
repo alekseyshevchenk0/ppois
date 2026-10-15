@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['board_5f_0',['board_',['../classTicTacToe.html#ae890e8e87907c291eb91969ad223185f',1,'TicTacToe']]]
+  ['default_5fsize_0',['DEFAULT_SIZE',['../classTicTacToe.html#a44736f9e8bd24abbdc188af496e37240',1,'TicTacToe']]]
 ];

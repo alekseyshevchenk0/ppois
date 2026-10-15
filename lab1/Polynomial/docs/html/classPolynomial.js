@@ -5,7 +5,6 @@ var classPolynomial =
     [ "Polynomial", "classPolynomial.html#ab44ca9d887fa7b5a71a6329bb1bece39", null ],
     [ "degree", "classPolynomial.html#af04eabb0fb25d8b6997de210e5ffdae1", null ],
     [ "isZero", "classPolynomial.html#a4a187cde826a35f42eb8dc97344edcb1", null ],
-    [ "normalize", "classPolynomial.html#aac0d640bac757450144504312f8af918", null ],
     [ "operator!=", "classPolynomial.html#a5deec7ce5c966458b5f0d5f571805e17", null ],
     [ "operator%=", "classPolynomial.html#a41b0c949d0666ace08ecf0c9211bfd8c", null ],
     [ "operator()", "classPolynomial.html#a42aebb7e468c993adcac986cb8dfbd96", null ],
@@ -16,6 +15,5 @@ var classPolynomial =
     [ "operator==", "classPolynomial.html#a221fa2b7494d726b2d0655a2e51f3f88", null ],
     [ "operator[]", "classPolynomial.html#a1e77d8011f9c9709e44996dfce3c920d", null ],
     [ "operator<<", "classPolynomial.html#ad946994348eafef6d3e20ebc08bfa5d2", null ],
-    [ "operator>>", "classPolynomial.html#aa526844f9962af6d6e8433b249efa2f7", null ],
-    [ "coeffs_", "classPolynomial.html#aa43bc13abb59d7470717670fa93b090f", null ]
+    [ "operator>>", "classPolynomial.html#aa526844f9962af6d6e8433b249efa2f7", null ]
 ];

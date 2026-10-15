@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['currentplayer_5f_0',['currentPlayer_',['../classTicTacToe.html#aeca7dedb69fb92dbda6139580742a800',1,'TicTacToe']]]
+  ['empty_5fcell_0',['EMPTY_CELL',['../classTicTacToe.html#a9cf1e5152d6dd676ec45087e7a7f6d71',1,'TicTacToe']]]
 ];

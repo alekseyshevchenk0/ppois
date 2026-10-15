@@ -1,42 +1,108 @@
 cmake_minimum_required(VERSION 3.20)
+
 project(Polynomial LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(BUILD_TESTS "Собирать unit-тесты (нужен GoogleTest)" ON)
-option(ENABLE_COVERAGE "Собирать с инструментацией для gcov (GCC/Clang)" OFF)
+option(BUILD_TESTS "Собирать unit-тесты" ON)
+option(ENABLE_COVERAGE "Включить покрытие кода тестами" OFF)
+option(BUILD_DOCS "Генерировать документацию Doxygen" ON)
 
-add_library(polynomial STATIC src/polynomial.cpp)
-target_include_directories(polynomial PUBLIC include)
-if(NOT MSVC)
-    target_compile_options(polynomial PRIVATE -Wall -Wextra)
+# Предупреждения компилятора
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(poly_ui src/main.cpp)
+# Библиотека с реализацией класса Polynomial
+add_library(polynomial STATIC
+    src/polynomial.cpp
+)
+
+target_include_directories(polynomial
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+# Консольный интерфейс
+add_executable(poly_ui
+    src/main.cpp
+)
+
 target_link_libraries(poly_ui PRIVATE polynomial)
 
-if(ENABLE_COVERAGE)
-    target_compile_options(polynomial PUBLIC --coverage -O0)
-    target_link_options(polynomial PUBLIC --coverage)
-endif()
-
+# Unit-тесты
 if(BUILD_TESTS)
     enable_testing()
-    find_package(GTest REQUIRED)
-    find_package(Threads REQUIRED)
 
-    add_executable(run_tests tests/test_polynomial.cpp)
-    target_link_libraries(run_tests PRIVATE polynomial GTest::gtest Threads::Threads)
-    add_test(NAME polynomial_tests COMMAND run_tests)
+    find_package(GTest REQUIRED)
+
+    add_executable(run_tests
+        tests/test_polynomial.cpp
+    )
+
+    target_link_libraries(run_tests
+        PRIVATE polynomial GTest::gtest
+    )
+
+    add_test(
+        NAME polynomial_tests
+        COMMAND run_tests
+    )
 endif()
 
-find_package(Doxygen QUIET)
-if(DOXYGEN_FOUND)
-    set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/docs")
-    set(DOXYGEN_OUTPUT_LANGUAGE Russian)
-    set(DOXYGEN_EXTRACT_PRIVATE YES)
-    set(DOXYGEN_GENERATE_LATEX NO)
-    doxygen_add_docs(docs include COMMENT "Генерация документации Doxygen")
+# Покрытие кода тестами: GCC и Clang
+if(ENABLE_COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        foreach(target polynomial poly_ui)
+            target_compile_options(${target}
+                PRIVATE --coverage -O0 -g
+            )
+            target_link_options(${target}
+                PRIVATE --coverage
+            )
+        endforeach()
+
+        if(BUILD_TESTS)
+            target_compile_options(run_tests
+                PRIVATE --coverage -O0 -g
+            )
+            target_link_options(run_tests
+                PRIVATE --coverage
+            )
+        endif()
+    else()
+        message(WARNING
+            "Покрытие поддерживается только для GCC и Clang."
+        )
+    endif()
+endif()
+
+# Документация Doxygen
+if(BUILD_DOCS)
+    find_package(Doxygen QUIET)
+
+    if(DOXYGEN_FOUND)
+        set(DOXYGEN_OUTPUT_DIRECTORY
+            "${CMAKE_BINARY_DIR}/docs"
+        )
+        set(DOXYGEN_HTML_OUTPUT "html")
+        set(DOXYGEN_GENERATE_HTML YES)
+        set(DOXYGEN_GENERATE_LATEX NO)
+        set(DOXYGEN_OUTPUT_LANGUAGE Russian)
+        set(DOXYGEN_EXTRACT_ALL YES)
+        set(DOXYGEN_WARN_IF_UNDOCUMENTED YES)
+        set(DOXYGEN_QUIET NO)
+
+        doxygen_add_docs(docs
+            "${CMAKE_CURRENT_SOURCE_DIR}/include"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/polynomial.cpp"
+            COMMENT "Генерация документации Doxygen"
+        )
+    else()
+        message(WARNING
+            "Doxygen не найден. Установи его: "
+            "sudo dnf install doxygen graphviz"
+        )
+    endif()
 endif()

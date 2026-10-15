@@ -9,8 +9,8 @@ namespace {
 
 using Board = std::vector<std::vector<char>>;
 
-constexpr char FILE_EMPTY_CELL = '.';
-constexpr int MAX_SIZE_FROM_STREAM = 100;
+constexpr char FILE_EMPTY_CELL = '.';       // как пустая клетка хранится в потоке/файле
+constexpr int MAX_SIZE_FROM_STREAM = 100;   // защита от гигантской аллокации при чтении
 
 bool isPlayerMark(char mark) {
     return mark == TicTacToe::PLAYER_X || mark == TicTacToe::PLAYER_O;
@@ -20,6 +20,7 @@ bool isValidHeader(int size, char player) {
     return size > 0 && size <= MAX_SIZE_FROM_STREAM && isPlayerMark(player);
 }
 
+// Переводит символ из потока в символ ячейки. Возвращает false для неизвестного символа.
 bool parseCell(char symbol, char& cell) {
     if (symbol == FILE_EMPTY_CELL) {
         cell = TicTacToe::EMPTY_CELL;
@@ -30,6 +31,7 @@ bool parseCell(char symbol, char& cell) {
     return true;
 }
 
+// Читает size x size ячеек. При ошибке возвращает false (failbit выставлен потоком или здесь).
 bool readBoard(std::istream& input, int size, Board& board) {
     board.assign(size, std::vector<char>(size, TicTacToe::EMPTY_CELL));
     for (auto& row : board) {
@@ -44,7 +46,7 @@ bool readBoard(std::istream& input, int size, Board& board) {
     return true;
 }
 
-}
+}  // namespace
 
 TicTacToe::TicTacToe(int boardSize) : size_(boardSize), currentPlayer_(PLAYER_X) {
     if (boardSize <= 0) {
@@ -130,6 +132,8 @@ bool TicTacToe::operator!=(const TicTacToe& other) const {
     return !(*this == other);
 }
 
+// Формат: "<size> <currentPlayer>\n" и size строк по size символов через пробел.
+// Пустая ячейка пишется как '.', потому что operator>> для char пропускает пробелы.
 std::ostream& operator<<(std::ostream& output, const TicTacToe& game) {
     output << game.size_ << ' ' << game.currentPlayer_ << '\n';
     for (const auto& row : game.board_) {
@@ -153,7 +157,7 @@ std::istream& operator>>(std::istream& input, TicTacToe& game) {
     }
 
     Board newBoard;
-    if (!readBoard(input, newSize, newBoard)) return input;
+    if (!readBoard(input, newSize, newBoard)) return input;  // game остаётся прежним
 
     game.size_ = newSize;
     game.currentPlayer_ = newPlayer;

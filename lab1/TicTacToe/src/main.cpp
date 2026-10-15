@@ -7,7 +7,7 @@ namespace {
 
 constexpr int MENU_NEW_GAME = 1;
 constexpr int MENU_EXIT = 2;
-constexpr int USER_INDEX_OFFSET = 1;
+constexpr int USER_INDEX_OFFSET = 1;      // пользователь считает строки и столбцы с 1, класс — с 0
 constexpr const char* CELL_BORDER = "----";
 
 int toUserNumber(int boardIndex) {
@@ -18,11 +18,13 @@ int toBoardIndex(int userNumber) {
     return userNumber - USER_INDEX_OFFSET;
 }
 
+// Сбрасывает ошибочное состояние cin и выбрасывает остаток строки.
 void clearInput() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
+// Сообщает об ошибке ввода. При закрытом вводе (EOF) молчит: вызывающий код завершит работу.
 void reportInputFailure(const std::string& message) {
     if (std::cin.eof()) return;
     std::cout << message << "\n";
@@ -63,6 +65,8 @@ void printBoard(const TicTacToe& game) {
     std::cout << "\n";
 }
 
+// Читает размер поля. Возвращает false, если ввод закончился (EOF).
+// При некорректном размере подставляет размер по умолчанию.
 bool readBoardSize(int& size) {
     std::cout << "Введите размер поля (например, 3 для 3x3): ";
     if (std::cin >> size && size > 0) return true;
@@ -73,6 +77,7 @@ bool readBoardSize(int& size) {
     return true;
 }
 
+// Возвращает true, если партия закончилась (победа или ничья), и сообщает результат.
 bool announceIfFinished(const TicTacToe& game) {
     const char winner = game.checkWinner();
     if (winner != TicTacToe::EMPTY_CELL) {
@@ -94,6 +99,7 @@ void applyMove(TicTacToe& game, int row, int col) {
     game.setMove(row, col, game.getCurrentPlayer());
 }
 
+// Один ход текущего игрока. Возвращает false, если ввод закончился (EOF).
 bool playTurn(TicTacToe& game) {
     int userRow = 0;
     int userCol = 0;
@@ -127,6 +133,7 @@ void printMenu() {
               << "Выберите пункт меню: ";
 }
 
+// Выполняет пункт меню. Возвращает false, если пользователь выбрал выход.
 bool executeChoice(int choice) {
     switch (choice) {
         case MENU_NEW_GAME:
@@ -141,7 +148,7 @@ bool executeChoice(int choice) {
     }
 }
 
-}
+}  // namespace
 
 int main() {
     bool running = true;

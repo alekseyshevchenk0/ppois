@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['player_5fo_0',['PLAYER_O',['../classTicTacToe.html#a8b9cb364b1a07aa5fe866a3bd0291306',1,'TicTacToe']]],
-  ['player_5fx_1',['PLAYER_X',['../classTicTacToe.html#a555e11d74573a3a59d86ed6614b34c69',1,'TicTacToe']]]
+  ['tictactoe_0',['TicTacToe',['../classTicTacToe.html',1,'TicTacToe'],['../classTicTacToe.html#ae1303551ea0e8b3c341c5f9b9b48a7f5',1,'TicTacToe::TicTacToe(int boardSize=DEFAULT_SIZE)'],['../classTicTacToe.html#a39819051343d1d83c1012d35ebf2e1ad',1,'TicTacToe::TicTacToe(const TicTacToe &amp;other)=default']]],
+  ['tictactoe_2ehpp_1',['tictactoe.hpp',['../tictactoe_8hpp.html',1,'']]]
 ];

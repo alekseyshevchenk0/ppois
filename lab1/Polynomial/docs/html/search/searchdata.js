@@ -1,11 +1,10 @@
 var indexSectionsWithContent =
 {
-  0: "cdinop",
+  0: "diop",
   1: "p",
   2: "p",
-  3: "dinop",
-  4: "c",
-  5: "o"
+  3: "diop",
+  4: "o"
 };
 
 var indexSectionNames =
@@ -14,8 +13,7 @@ var indexSectionNames =
   1: "classes",
   2: "files",
   3: "functions",
-  4: "variables",
-  5: "related"
+  4: "related"
 };
 
 var indexSectionLabels =
@@ -24,7 +22,6 @@ var indexSectionLabels =
   1: "Классы",
   2: "Файлы",
   3: "Функции",
-  4: "Переменные",
-  5: "Друзья"
+  4: "Друзья"
 };
 
