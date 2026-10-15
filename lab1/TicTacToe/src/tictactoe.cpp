@@ -4,6 +4,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <utility>
+#include <algorithm>
 
 namespace {
 
@@ -108,12 +109,19 @@ char TicTacToe::checkWinner() const {
 }
 
 bool TicTacToe::isBoardFull() const {
-    for (const auto& row : board_) {
-        for (char cell : row) {
-            if (cell == EMPTY_CELL) return false;
+    return std::all_of(
+        board_.begin(),
+        board_.end(),
+        [](const auto& row) {
+            return std::all_of(
+                row.begin(),
+                row.end(),
+                [](char cell) {
+                    return cell != EMPTY_CELL;
+                }
+            );
         }
-    }
-    return true;
+    );
 }
 
 int TicTacToe::getSize() const {
