@@ -8,6 +8,7 @@ on:
       - feature/lab1
     tags:
       - "v*"
+
   pull_request:
     branches:
       - main
@@ -18,15 +19,16 @@ permissions:
 
 jobs:
   build-and-test:
+    name: Build, Test and Coverage
     runs-on: ubuntu-latest
 
     steps:
-      - name: Получить исходный код
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Установить зависимости
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -36,7 +38,9 @@ jobs:
             cppcheck \
             libgtest-dev
 
-      - name: Проверить код через cppcheck
+      # ---------------- Static analysis ----------------
+
+      - name: Run cppcheck
         run: |
           cppcheck \
             --enable=all \
@@ -49,23 +53,27 @@ jobs:
 
       # ---------------- TicTacToe ----------------
 
-      - name: Настроить TicTacToe
+      - name: Configure TicTacToe
         run: |
           rm -rf lab1/TicTacToe/build
-          cmake -S lab1/TicTacToe -B lab1/TicTacToe/build \
+          cmake \
+            -S lab1/TicTacToe \
+            -B lab1/TicTacToe/build \
             -DCMAKE_BUILD_TYPE=Debug \
             -DBUILD_TESTS=ON \
             -DENABLE_COVERAGE=ON
 
-      - name: Собрать TicTacToe
+      - name: Build TicTacToe
         run: |
-          cmake --build lab1/TicTacToe/build --clean-first --parallel 2
+          cmake --build lab1/TicTacToe/build --parallel 2
 
-      - name: Запустить тесты TicTacToe
+      - name: Test TicTacToe
         run: |
-          ctest --test-dir lab1/TicTacToe/build --output-on-failure
+          ctest \
+            --test-dir lab1/TicTacToe/build \
+            --output-on-failure
 
-      - name: Собрать покрытие TicTacToe
+      - name: Capture TicTacToe coverage
         run: |
           lcov \
             --capture \
@@ -75,11 +83,12 @@ jobs:
             --ignore-errors mismatch \
             --rc branch_coverage=1
 
+      - name: Filter TicTacToe coverage
+        run: |
           lcov \
             --remove lab1/TicTacToe/build/coverage.info \
             '/usr/*' \
             '*/tests/*' \
-            '*/build/*' \
             --output-file lab1/TicTacToe/build/coverage_filtered.info \
             --ignore-errors mismatch \
             --rc branch_coverage=1
@@ -90,23 +99,27 @@ jobs:
 
       # ---------------- Polynomial ----------------
 
-      - name: Настроить Polynomial
+      - name: Configure Polynomial
         run: |
           rm -rf lab1/Polynomial/build
-          cmake -S lab1/Polynomial -B lab1/Polynomial/build \
+          cmake \
+            -S lab1/Polynomial \
+            -B lab1/Polynomial/build \
             -DCMAKE_BUILD_TYPE=Debug \
             -DBUILD_TESTS=ON \
             -DENABLE_COVERAGE=ON
 
-      - name: Собрать Polynomial
+      - name: Build Polynomial
         run: |
-          cmake --build lab1/Polynomial/build --clean-first --parallel 2
+          cmake --build lab1/Polynomial/build --parallel 2
 
-      - name: Запустить тесты Polynomial
+      - name: Test Polynomial
         run: |
-          ctest --test-dir lab1/Polynomial/build --output-on-failure
+          ctest \
+            --test-dir lab1/Polynomial/build \
+            --output-on-failure
 
-      - name: Собрать покрытие Polynomial
+      - name: Capture Polynomial coverage
         run: |
           lcov \
             --capture \
@@ -116,11 +129,12 @@ jobs:
             --ignore-errors mismatch \
             --rc branch_coverage=1
 
+      - name: Filter Polynomial coverage
+        run: |
           lcov \
             --remove lab1/Polynomial/build/coverage.info \
             '/usr/*' \
             '*/tests/*' \
-            '*/build/*' \
             --output-file lab1/Polynomial/build/coverage_filtered.info \
             --ignore-errors mismatch \
             --rc branch_coverage=1
@@ -129,9 +143,9 @@ jobs:
             --list lab1/Polynomial/build/coverage_filtered.info \
             --rc branch_coverage=1
 
-      # ---------------- Artifacts ----------------
+      # ---------------- Upload coverage reports ----------------
 
-      - name: Сохранить отчёты покрытия
+      - name: Upload coverage reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -144,27 +158,32 @@ jobs:
   # ---------------- Release ----------------
 
   release:
+    name: Create GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build-and-test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Получить исходный код
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Создать архивы проектов
+      - name: Package projects
         run: |
-          tar --exclude='*/build' \
-              --exclude='*/build/*' \
-              -czf TicTacToe.tar.gz lab1/TicTacToe
+          tar \
+            --exclude='build' \
+            --exclude='*/build/*' \
+            -czf TicTacToe.tar.gz \
+            -C lab1 TicTacToe
 
-          tar --exclude='*/build' \
-              --exclude='*/build/*' \
-              -czf Polynomial.tar.gz lab1/Polynomial
+          tar \
+            --exclude='build' \
+            --exclude='*/build/*' \
+            -czf Polynomial.tar.gz \
+            -C lab1 Polynomial
 
-      - name: Опубликовать релиз
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
