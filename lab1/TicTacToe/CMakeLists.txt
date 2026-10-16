@@ -10,12 +10,10 @@ option(BUILD_TESTS "Собирать unit-тесты" ON)
 option(ENABLE_COVERAGE "Включить покрытие кода тестами" ON)
 option(BUILD_DOCS "Генерировать документацию Doxygen" ON)
 
-# Общие настройки компиляции
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra)
 endif()
 
-# Библиотека игры
 add_library(tictactoe STATIC
     src/tictactoe.cpp
 )
@@ -25,7 +23,6 @@ target_include_directories(tictactoe
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# Пользовательское приложение
 add_executable(tictactoe_ui
     src/main.cpp
 )
@@ -59,19 +56,15 @@ if(BUILD_TESTS)
     )
 endif()
 
-# Покрытие кода тестами: GCC / Clang
 if(ENABLE_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
        OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
-        # Инструментация библиотеки
         target_compile_options(tictactoe PRIVATE
             --coverage
             -O0
             -g
         )
-
-        # Инструментация приложения
         target_compile_options(tictactoe_ui PRIVATE
             --coverage
             -O0
@@ -79,7 +72,6 @@ if(ENABLE_COVERAGE)
         )
         target_link_options(tictactoe_ui PRIVATE --coverage)
 
-        # Инструментация тестов
         if(BUILD_TESTS)
             target_compile_options(run_tests PRIVATE
                 --coverage
@@ -96,7 +88,6 @@ if(ENABLE_COVERAGE)
     endif()
 endif()
 
-# Документация Doxygen — независимо от покрытия и тестов
 if(BUILD_DOCS)
     find_package(Doxygen QUIET)
 

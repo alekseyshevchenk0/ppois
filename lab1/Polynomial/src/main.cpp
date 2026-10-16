@@ -99,7 +99,7 @@ void showCoefficient(const Polynomial& a, const Polynomial& b) {
         return;
     }
     const Polynomial& p = (which == 'A' || which == 'a') ? a : b;
-    const double value = p[static_cast<std::size_t>(index)];  // может бросить исключение до вывода
+    const double value = p[static_cast<std::size_t>(index)];
     std::cout << "Коэффициент при x^" << index << " равен " << value << "\n";
 }
 

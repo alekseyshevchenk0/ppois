@@ -7,8 +7,6 @@
 
 namespace {
 
-// Строит поле по строкам: 'X', 'O' или '.' (пусто).
-// setMove не проверяет оQQAчерёдность, поэтому порядок расстановки не важен.
 TicTacToe makeBoard(const std::vector<std::string>& rows) {
     TicTacToe game(static_cast<int>(rows.size()));
     for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
@@ -19,7 +17,6 @@ TicTacToe makeBoard(const std::vector<std::string>& rows) {
     return game;
 }
 
-// Строит текст игры размера size, где все клетки пусты, в формате operator<<.
 std::string emptyBoardText(int size) {
     std::string text = std::to_string(size) + " X\n";
     for (int row = 0; row < size; ++row) {
@@ -29,9 +26,7 @@ std::string emptyBoardText(int size) {
     return text;
 }
 
-}  // namespace
-
-// ---------- Конструкторы ----------
+}
 
 TEST(TicTacToeTest, Initialization) {
     TicTacToe game(3);
@@ -63,8 +58,6 @@ TEST(TicTacToeTest, InvalidSizeException) {
     EXPECT_THROW(TicTacToe game(0), std::invalid_argument);
     EXPECT_THROW(TicTacToe game(-2), std::invalid_argument);
 }
-
-// ---------- Ходы ----------
 
 TEST(TicTacToeTest, ValidMoves) {
     TicTacToe game(3);
@@ -98,8 +91,8 @@ TEST(TicTacToeTest, SetMoveInvalidMark) {
     TicTacToe game(3);
     EXPECT_THROW(game.setMove(0, 0, 'Z'), std::invalid_argument);
     EXPECT_THROW(game.setMove(0, 0, ' '), std::invalid_argument);
-    EXPECT_EQ(game.getCell(0, 0), TicTacToe::EMPTY_CELL);     // поле не изменилось
-    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_X);  // очередь не сменилась
+    EXPECT_EQ(game.getCell(0, 0), TicTacToe::EMPTY_CELL);
+    EXPECT_EQ(game.getCurrentPlayer(), TicTacToe::PLAYER_X);
 }
 
 TEST(TicTacToeTest, SetMoveOccupiedCell) {
@@ -127,8 +120,6 @@ TEST(TicTacToeTest, GetCellOutOfRange) {
     EXPECT_THROW(game.getCell(0, 3), std::out_of_range);
     EXPECT_THROW(game.getCell(5, 5), std::out_of_range);
 }
-
-// ---------- Победитель ----------
 
 TEST(TicTacToeTest, RowWinner) {
     for (int row = 0; row < 3; ++row) {
@@ -172,7 +163,6 @@ TEST(TicTacToeTest, NoWinnerOnEmptyBoard) {
 }
 
 TEST(TicTacToeTest, NoWinnerOnIncompleteLines) {
-    // Линия не замкнута пустой клеткой в конце / в начале / посередине.
     EXPECT_EQ(makeBoard({"XX.", "...", "..."}).checkWinner(), TicTacToe::EMPTY_CELL);
     EXPECT_EQ(makeBoard({".XX", "...", "..."}).checkWinner(), TicTacToe::EMPTY_CELL);
     EXPECT_EQ(makeBoard({"X.X", "...", "..."}).checkWinner(), TicTacToe::EMPTY_CELL);
@@ -192,7 +182,7 @@ TEST(TicTacToeTest, WinnerOnLargerBoard) {
 
     TicTacToe almostLine(4);
     for (int col = 0; col < 3; ++col) almostLine.setMove(1, col, 'X');
-    EXPECT_EQ(almostLine.checkWinner(), TicTacToe::EMPTY_CELL);  // 3 из 4 — ещё не победа
+    EXPECT_EQ(almostLine.checkWinner(), TicTacToe::EMPTY_CELL);
 }
 
 TEST(TicTacToeTest, SingleCellBoard) {
@@ -203,8 +193,6 @@ TEST(TicTacToeTest, SingleCellBoard) {
     EXPECT_EQ(game.checkWinner(), 'X');
     EXPECT_TRUE(game.isBoardFull());
 }
-
-// ---------- Заполненность / ничья ----------
 
 TEST(TicTacToeTest, BoardNotFull) {
     TicTacToe game(3);
@@ -221,8 +209,6 @@ TEST(TicTacToeTest, BoardFullDraw) {
     EXPECT_EQ(game.checkWinner(), TicTacToe::EMPTY_CELL);
 }
 
-// ---------- Копирование и сравнение ----------
-
 TEST(TicTacToeTest, CopyAndAssign) {
     TicTacToe original(3);
     original.setMove(0, 0, 'X');
@@ -235,7 +221,6 @@ TEST(TicTacToeTest, CopyAndAssign) {
     EXPECT_TRUE(original == assigned);
     EXPECT_FALSE(original != assigned);
 
-    // Копия независима от оригинала.
     copied.setMove(1, 1, 'O');
     EXPECT_NE(original, copied);
     EXPECT_EQ(original.getCell(1, 1), TicTacToe::EMPTY_CELL);
@@ -259,8 +244,8 @@ TEST(TicTacToeTest, EqualityDetectsDifferentSize) {
 TEST(TicTacToeTest, EqualityDetectsDifferentCurrentPlayer) {
     TicTacToe xMovedFirst(3);
     TicTacToe oMovedFirst(3);
-    xMovedFirst.setMove(0, 0, 'X');  // дальше ходит O
-    oMovedFirst.setMove(0, 0, 'O');  // дальше ходит X
+    xMovedFirst.setMove(0, 0, 'X');
+    oMovedFirst.setMove(0, 0, 'O');
     EXPECT_NE(xMovedFirst, oMovedFirst);
 }
 
@@ -272,18 +257,14 @@ TEST(TicTacToeTest, EqualityDetectsDifferentCells) {
     EXPECT_NE(movedToCorner, movedToEdge);
 }
 
-// ---------- Потоки: вывод ----------
-
 TEST(TicTacToeTest, OutputFormat) {
     TicTacToe game(2);
-    game.setMove(0, 1, 'X');  // дальше ходит O
+    game.setMove(0, 1, 'X');
 
     std::ostringstream output;
     output << game;
     EXPECT_EQ(output.str(), "2 O\n. X\n. .\n");
 }
-
-// ---------- Потоки: ввод ----------
 
 TEST(TicTacToeTest, StreamOperators) {
     TicTacToe original(3);
@@ -299,7 +280,6 @@ TEST(TicTacToeTest, StreamOperators) {
 }
 
 TEST(TicTacToeTest, StreamRoundTripKeepsEmptyCells) {
-    // Пустые клетки между занятыми не должны «схлопываться» при чтении.
     TicTacToe original = makeBoard({"X..",
                                     ".O.",
                                     "..X"});
@@ -348,7 +328,6 @@ TEST(TicTacToeTest, StreamAcceptsMaxSize) {
     EXPECT_EQ(game.getSize(), 100);
 }
 
-// При любой ошибке чтения поток получает failbit, а объект остаётся прежним.
 class StreamFailureTest : public ::testing::TestWithParam<std::string> {};
 
 TEST_P(StreamFailureTest, FailsAndKeepsGameUnchanged) {
@@ -366,29 +345,27 @@ TEST_P(StreamFailureTest, FailsAndKeepsGameUnchanged) {
 INSTANTIATE_TEST_SUITE_P(
     BadInputs, StreamFailureTest,
     ::testing::Values(
-        std::string(""),                          // пустой поток
-        std::string("abc X\n"),                   // размер не число
-        std::string("3\n"),                       // нет игрока
-        std::string("0 X\n"),                     // размер 0
-        std::string("-3 X\n"),                    // отрицательный размер
-        std::string("101 X\n"),                   // больше максимума
-        std::string("2 Z\n. .\n. .\n"),           // неизвестный игрок
-        std::string("2 X\n. Q\n. .\n"),           // неизвестный символ клетки
-        std::string("2 X\n. .\n.\n"),             // обрыв посреди доски
-        std::string("3 X\nX O\n")                 // слишком мало клеток
+        std::string(""),                         
+        std::string("abc X\n"),
+        std::string("3\n"),
+        std::string("0 X\n"),
+        std::string("-3 X\n"),
+        std::string("101 X\n"),
+        std::string("2 Z\n. .\n. .\n"),
+        std::string("2 X\n. Q\n. .\n"),
+        std::string("2 X\n. .\n.\n"),
+        std::string("3 X\nX O\n")
     ));
 
 TEST(TicTacToeAdditionalTest, InequalityOperatorExplicit) {
     TicTacToe game1(3);
     TicTacToe game2(3);
     game2.setMove(0, 0, 'X');
-    // Явный вызов operator!= для покрытия метода
     EXPECT_TRUE(game1 != game2);
     EXPECT_FALSE(game1 != game1);
 }
 
 TEST(TicTacToeAdditionalTest, InvalidHeaderStreaming) {
-    // Проверка isValidHeader через недопустимый символ игрока в заголовке потока
     std::istringstream input("3 Z\n. . .\n. . .\n. . .\n");
     TicTacToe game;
     input >> game;
@@ -396,7 +373,6 @@ TEST(TicTacToeAdditionalTest, InvalidHeaderStreaming) {
 }
 
 TEST(TicTacToeAdditionalTest, OutputFormattingBranches) {
-    // Проверка вывода operator<< для разных размеров доски (покрытие ветвлений пробелов)
     TicTacToe game1(1);
     std::ostringstream out1;
     out1 << game1;

@@ -5,8 +5,6 @@
 #include <vector>
 #include "../include/polynomial.hpp"
 
-// ---------- Конструкторы и нормализация ----------
-
 TEST(PolynomialTest, DefaultIsZero) {
     Polynomial p;
     EXPECT_TRUE(p.isZero());
@@ -16,7 +14,7 @@ TEST(PolynomialTest, DefaultIsZero) {
 }
 
 TEST(PolynomialTest, ConstructFromInitializerList) {
-    Polynomial p{1, 2, 3};  // 3x^2 + 2x + 1
+    Polynomial p{1, 2, 3};
     EXPECT_EQ(p.degree(), 2u);
     EXPECT_FALSE(p.isZero());
     EXPECT_DOUBLE_EQ(p[0], 1.0);
@@ -62,12 +60,10 @@ TEST(PolynomialTest, NegativeZeroIsZero) {
 }
 
 TEST(PolynomialTest, ConstantTermZeroIsNotZeroPolynomial) {
-    Polynomial p{0, 1};  // x
+    Polynomial p{0, 1};
     EXPECT_FALSE(p.isZero());
     EXPECT_EQ(p.degree(), 1u);
 }
-
-// ---------- Оператор [] ----------
 
 TEST(PolynomialTest, IndexOutOfRange) {
     Polynomial p{1, 2, 3};
@@ -77,18 +73,14 @@ TEST(PolynomialTest, IndexOutOfRange) {
     EXPECT_THROW(Polynomial()[1], std::out_of_range);
 }
 
-// ---------- Вычисление значения ----------
-
 TEST(PolynomialTest, Evaluate) {
-    Polynomial p{1, 2, 3};  // 3x^2 + 2x + 1
+    Polynomial p{1, 2, 3};
     EXPECT_DOUBLE_EQ(p(0.0), 1.0);
     EXPECT_DOUBLE_EQ(p(1.0), 6.0);
     EXPECT_DOUBLE_EQ(p(2.0), 17.0);
     EXPECT_DOUBLE_EQ(p(-1.0), 2.0);
     EXPECT_DOUBLE_EQ(p(0.5), 2.75);
 }
-
-// ---------- Сложение ----------
 
 TEST(PolynomialTest, AddDifferentDegrees) {
     Polynomial a{1, 2, 3};
@@ -126,8 +118,6 @@ TEST(PolynomialTest, AddSelf) {
     EXPECT_EQ(a, (Polynomial{2, 4, 6}));
 }
 
-// ---------- Вычитание ----------
-
 TEST(PolynomialTest, SubtractDifferentDegrees) {
     EXPECT_EQ((Polynomial{5, 7, 9}) - (Polynomial{1, 2}), (Polynomial{4, 5, 9}));
     EXPECT_EQ((Polynomial{1, 2}) - (Polynomial{5, 7, 9}), (Polynomial{-4, -5, -9}));
@@ -146,12 +136,8 @@ TEST(PolynomialTest, SubtractAssign) {
     EXPECT_EQ(a, (Polynomial{2, 2}));
 }
 
-// ---------- Умножение ----------
-
 TEST(PolynomialTest, Multiply) {
-    // (1 + x)(1 - x) = 1 - x^2
     EXPECT_EQ((Polynomial{1, 1}) * (Polynomial{1, -1}), (Polynomial{1, 0, -1}));
-    // (x^2 + 2)(3x + 4) = 3x^3 + 4x^2 + 6x + 8
     EXPECT_EQ((Polynomial{2, 0, 1}) * (Polynomial{4, 3}), (Polynomial{8, 6, 4, 3}));
 }
 
@@ -176,10 +162,7 @@ TEST(PolynomialTest, MultiplyAssignAndSelf) {
     EXPECT_EQ(a, (Polynomial{0, 1, 2, 1}));
 }
 
-// ---------- Деление ----------
-
 TEST(PolynomialTest, DivideExactly) {
-    // (x^2 - 1) / (x - 1) = x + 1
     Polynomial a{-1, 0, 1};
     Polynomial b{-1, 1};
     EXPECT_EQ(a / b, (Polynomial{1, 1}));
@@ -187,7 +170,6 @@ TEST(PolynomialTest, DivideExactly) {
 }
 
 TEST(PolynomialTest, DivideWithRemainder) {
-    // (x^2 + 1) / (x - 1) = x + 1, остаток 2
     Polynomial a{1, 0, 1};
     Polynomial b{-1, 1};
     EXPECT_EQ(a / b, (Polynomial{1, 1}));
@@ -195,7 +177,6 @@ TEST(PolynomialTest, DivideWithRemainder) {
 }
 
 TEST(PolynomialTest, DivideNonUnitLeadingCoefficient) {
-    // (2x^2 + 3x + 1) / (2x + 1) = x + 1
     Polynomial a{1, 3, 2};
     Polynomial b{1, 2};
     EXPECT_EQ(a / b, (Polynomial{1, 1}));
@@ -221,7 +202,6 @@ TEST(PolynomialTest, DivideZeroByNonZero) {
 }
 
 TEST(PolynomialTest, DivisionIdentity) {
-    // a == (a / b) * b + a % b
     Polynomial a{3, -2, 5, 1};
     for (const Polynomial& b : {Polynomial{1, 1}, Polynomial{2, 0, 1}, Polynomial{4}}) {
         EXPECT_EQ((a / b) * b + (a % b), a);
@@ -257,10 +237,8 @@ TEST(PolynomialTest, DivisionByZeroThrows) {
     EXPECT_THROW(a % zero, std::domain_error);
     EXPECT_THROW(a /= zero, std::domain_error);
     EXPECT_THROW(a %= zero, std::domain_error);
-    EXPECT_EQ(a, (Polynomial{1, 2, 3}));  // при ошибке объект не меняется
+    EXPECT_EQ(a, (Polynomial{1, 2, 3}));
 }
-
-// ---------- Копирование и сравнение ----------
 
 TEST(PolynomialTest, CopyAndAssign) {
     Polynomial a{1, 2, 3};
@@ -272,7 +250,6 @@ TEST(PolynomialTest, CopyAndAssign) {
     EXPECT_TRUE(a == c);
     EXPECT_FALSE(a != c);
 
-    // Копия независима от оригинала.
     b += Polynomial{1};
     EXPECT_NE(a, b);
     EXPECT_EQ(a, (Polynomial{1, 2, 3}));
@@ -287,7 +264,7 @@ TEST(PolynomialTest, SelfAssign) {
 
 TEST(PolynomialTest, Equality) {
     EXPECT_TRUE((Polynomial{1, 2, 3}) == (Polynomial{1, 2, 3}));
-    EXPECT_TRUE((Polynomial{1, 2, 0}) == (Polynomial{1, 2}));  // лишний нуль не мешает
+    EXPECT_TRUE((Polynomial{1, 2, 0}) == (Polynomial{1, 2}));
     EXPECT_TRUE((Polynomial{1, 2, 3}) != (Polynomial{1, 2, 4}));
     EXPECT_TRUE((Polynomial{1, 2}) != (Polynomial{1, 2, 3}));
     EXPECT_TRUE(Polynomial() == Polynomial{0});
@@ -360,7 +337,6 @@ TEST(PolynomialTest, InputAcceptsMaxDegree) {
     EXPECT_EQ(p.degree(), 1000u);
 }
 
-// При любой ошибке чтения поток получает failbit, а объект остаётся прежним.
 class PolynomialInputFailureTest : public ::testing::TestWithParam<std::string> {};
 
 TEST_P(PolynomialInputFailureTest, FailsAndKeepsPolynomialUnchanged) {

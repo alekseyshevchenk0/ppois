@@ -10,12 +10,10 @@ option(BUILD_TESTS "Собирать unit-тесты" ON)
 option(ENABLE_COVERAGE "Включить покрытие кода тестами" OFF)
 option(BUILD_DOCS "Генерировать документацию Doxygen" ON)
 
-# Предупреждения компилятора
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# Библиотека с реализацией класса Polynomial
 add_library(polynomial STATIC
     src/polynomial.cpp
 )
@@ -24,14 +22,12 @@ target_include_directories(polynomial
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# Консольный интерфейс
 add_executable(poly_ui
     src/main.cpp
 )
 
 target_link_libraries(poly_ui PRIVATE polynomial)
 
-# Unit-тесты
 if(BUILD_TESTS)
     enable_testing()
 
@@ -51,7 +47,6 @@ if(BUILD_TESTS)
     )
 endif()
 
-# Покрытие кода тестами: GCC и Clang
 if(ENABLE_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         foreach(target polynomial poly_ui)
@@ -78,7 +73,6 @@ if(ENABLE_COVERAGE)
     endif()
 endif()
 
-# Документация Doxygen
 if(BUILD_DOCS)
     find_package(Doxygen QUIET)
 
