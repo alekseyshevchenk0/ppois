@@ -45,7 +45,7 @@ gcovr --root . --object-directory build --filter 'src/' --exclude 'src/main.cpp'
 
 Generated with [Doxygen](https://www.doxygen.nl/).
 
-The HTML documentation is generated in `build/docs/html`. Open `build/docs/html/index.html` in a browser.
+The HTML documentation is generated in `docs/html`. Open `docs/html/index.html` in a browser.
 
 ## Releases
 
