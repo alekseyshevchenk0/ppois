@@ -76,9 +76,9 @@ jobs:
             --object-directory lab1/TicTacToe/build \
             --filter 'lab1/TicTacToe/src/' \
             --exclude 'lab1/TicTacToe/src/main.cpp' \
-            --txt-metric line \
-            --txt-metric branch \
-            --output lab1/TicTacToe/build/coverage.txt
+            --html-details \
+            --output lab1/TicTacToe/build/coverage.html \
+            --fail-under-line 91
 
       - name: Configure Polynomial
         run: |
@@ -107,9 +107,9 @@ jobs:
             --object-directory lab1/Polynomial/build \
             --filter 'lab1/Polynomial/src/' \
             --exclude 'lab1/Polynomial/src/main.cpp' \
-            --txt-metric line \
-            --txt-metric branch \
-            --output lab1/Polynomial/build/coverage.txt
+            --html-details \
+            --output lab1/Polynomial/build/coverage.html \
+            --fail-under-line 91
 
       - name: Upload coverage reports
         if: always()
@@ -117,8 +117,10 @@ jobs:
         with:
           name: coverage-reports
           path: |
-            lab1/TicTacToe/build/coverage.txt
-            lab1/Polynomial/build/coverage.txt
+            lab1/TicTacToe/build/coverage.html
+            lab1/TicTacToe/build/coverage/
+            lab1/Polynomial/build/coverage.html
+            lab1/Polynomial/build/coverage/
           if-no-files-found: warn
 
   release:
