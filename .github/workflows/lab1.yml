@@ -123,8 +123,10 @@ jobs:
             lab1/Polynomial/build/coverage/
           if-no-files-found: warn
 
+  
+  
   release:
-    name: Create GitHub Release
+    name: Build and Publish Release
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build-and-test
     runs-on: ubuntu-latest
@@ -135,23 +137,56 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Package projects
+      - name: Install build dependencies
         run: |
-          tar \
-            --exclude='build' \
-            --exclude='*/build/*' \
-            -czf TicTacToe.tar.gz \
-            -C lab1 TicTacToe
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ doxygen graphviz
 
-          tar \
-            --exclude='build' \
-            --exclude='*/build/*' \
-            -czf Polynomial.tar.gz \
-            -C lab1 Polynomial
+      - name: Build TicTacToe
+        run: |
+          cmake -S lab1/TicTacToe \
+                -B lab1/TicTacToe/build-release \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DBUILD_TESTS=OFF \
+                -DENABLE_COVERAGE=OFF \
+                -DBUILD_DOCS=OFF
+
+          cmake --build lab1/TicTacToe/build-release --parallel 2
+
+      - name: Build Polynomial
+        run: |
+          cmake -S lab1/Polynomial \
+                -B lab1/Polynomial/build-release \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DBUILD_TESTS=OFF \
+                -DENABLE_COVERAGE=OFF \
+                -DBUILD_DOCS=OFF
+
+          cmake --build lab1/Polynomial/build-release --parallel 2
+
+      - name: Package executables
+        run: |
+          mkdir -p release
+
+          cp lab1/TicTacToe/build-release/tictactoe_ui \
+             release/tictactoe
+
+          cp lab1/Polynomial/build-release/poly_ui \
+             release/polynomial
+
+          chmod +x release/tictactoe release/polynomial
+
+          tar -czf TicTacToe-linux-x86_64.tar.gz \
+              -C release tictactoe
+
+          tar -czf Polynomial-linux-x86_64.tar.gz \
+              -C release polynomial
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          generate_release_notes: true
           files: |
-            TicTacToe.tar.gz
-            Polynomial.tar.gz
+            TicTacToe-linux-x86_64.tar.gz
+            Polynomial-linux-x86_64.tar.gz
+
