@@ -38,7 +38,7 @@ Code coverage:
 cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
-gcovr --root . --object-directory build --filter 'src/' --exclude 'src/main.cpp' --txt-metric line --txt-metric branch
+gcovr --root . --object-directory build --filter 'src/' --exclude 'src/main.cpp' --txt-metric line
 ```
 
 ## Documentation
