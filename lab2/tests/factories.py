@@ -1,4 +1,3 @@
-"""Фабрики тестовых объектов."""
 from audio_collection.catalog import Duration
 from audio_collection.collection import AudioCollection, StorageDevice
 from audio_collection.media import Album, AudioFile, AudioFormat, Track
