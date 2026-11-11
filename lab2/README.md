@@ -147,7 +147,7 @@ The model contains **60 classes** in 11 modules of the `audio_collection` packag
 
 ## Associations
 
-An association is a relationship where a class stores another class in a field (including inside a collection) or receives it as a method parameter. The table is built automatically from type annotations; self-references and inheritance are not counted.
+An association is a relationship where a class stores another class in a field (including inside a collection) or receives it as a method parameter. Self-references and inheritance are not counted.
 
 | From | To | Relationship |
 |---|---|---|
