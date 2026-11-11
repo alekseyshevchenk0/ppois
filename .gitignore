@@ -5,7 +5,6 @@
 *.dll
 *.so
 *.dylib
-build/
 bin/
 out/
 target/
@@ -20,3 +19,13 @@ cmake-install.cmake
 Makefile
 *.log
 .DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.idea/
+*.egg-info/
+dist/
+build/
+.venv/
