@@ -6,6 +6,9 @@ on:
       - main
       - master
       - feature/lab1
+    paths:
+      - "lab1/**"
+      - ".github/workflows/lab1.yml"
     tags:
       - "v*"
 
@@ -13,6 +16,9 @@ on:
     branches:
       - main
       - master
+    paths:
+      - "lab1/**"
+      - ".github/workflows/lab1.yml"
 
 permissions:
   contents: write
