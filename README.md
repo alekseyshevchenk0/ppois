@@ -5,7 +5,7 @@
 | Lab | Language | Contents | Docs |
 |-----|----------|----------|------|
 | 1 | C++ | [TicTacToe](./lab1/TicTacToe), [Polynomial](./lab1/Polynomial) | Doxygen, [Documentation](#documentation) |
-| 2 | Python | [Audio Collection](./lab2) — large OOP project (60 classes) | [lab2/README.md](./lab2/README.md) |
+| 2 | Python | [Audio Collection](./lab2) | [lab2/README.md](./lab2/README.md) |
 
 Each lab 1 project has the same layout:
 
