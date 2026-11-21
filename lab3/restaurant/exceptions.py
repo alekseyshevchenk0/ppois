@@ -38,3 +38,11 @@ class AllergenConflictError(RestaurantError):
         super().__init__(f"Dish '{dish_name}' contains forbidden allergens: {names}")
         self.dish_name = dish_name
         self.allergen_names = names
+
+class EmployeeNotAvailableError(RestaurantError):
+    """Raised when an employee cannot take a shift or a task."""
+
+    def __init__(self, employee_name: str, reason: str) -> None:
+        super().__init__(f"Employee '{employee_name}' is not available: {reason}")
+        self.employee_name = employee_name
+        self.reason = reason
