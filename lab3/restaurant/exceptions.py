@@ -46,3 +46,11 @@ class EmployeeNotAvailableError(RestaurantError):
         super().__init__(f"Employee '{employee_name}' is not available: {reason}")
         self.employee_name = employee_name
         self.reason = reason
+
+class InsufficientPointsError(RestaurantError):
+    """Raised when a loyalty card has fewer points than the guest wants to spend."""
+
+    def __init__(self, requested: int, available: int) -> None:
+        super().__init__(f"Not enough loyalty points: requested {requested}, available {available}")
+        self.requested = requested
+        self.available = available
