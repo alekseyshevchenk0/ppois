@@ -39,7 +39,6 @@ class AllergenConflictError(RestaurantError):
         self.dish_name = dish_name
         self.allergen_names = names
 
-
 class EmployeeNotAvailableError(RestaurantError):
     """Raised when an employee cannot take a shift or a task."""
 
