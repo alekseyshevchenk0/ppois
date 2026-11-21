@@ -25,7 +25,6 @@ class StorageDevice:
         self.used_bytes += size_bytes
 
     def release(self, size_bytes: int) -> None:
-        """Освобождает место на носителе."""
         self.used_bytes = max(0, self.used_bytes - size_bytes)
 
 
