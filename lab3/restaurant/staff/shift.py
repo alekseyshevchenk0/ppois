@@ -1,14 +1,15 @@
+"""A working shift of one employee."""
 from __future__ import annotations
 
 from datetime import date, time
 
 from restaurant.exceptions import InvalidDataError
 from restaurant.staff.employee import Employee
+from restaurant.timeunits import MINUTES_IN_HOUR
 
 NIGHT_START_HOUR = 22
 NIGHT_END_HOUR = 6
 HOURS_IN_DAY = 24
-MINUTES_IN_HOUR = 60
 
 
 def to_hours(moment: time) -> float:
@@ -20,6 +21,8 @@ def overlap_hours(first_start: float, first_end: float, second_start: float, sec
 
 
 class Shift:
+    """One employee works on one day from `start` to `end` (shifts do not cross midnight)."""
+
     def __init__(self, employee: Employee, day: date, start: time, end: time) -> None:
         if end <= start:
             raise InvalidDataError("Shift must end after it starts")

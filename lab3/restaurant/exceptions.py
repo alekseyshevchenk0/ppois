@@ -1,4 +1,3 @@
-"""Domain exceptions of the restaurant system."""
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -81,3 +80,37 @@ class ReservationConflictError(RestaurantError):
         super().__init__(f"Стол №{table_number} уже занят на {start:%d.%m.%Y %H:%M}")
         self.table_number = table_number
         self.start = start
+
+
+class OrderNotFoundError(RestaurantError):
+    def __init__(self, order_number: int) -> None:
+        super().__init__(f"Заказ №{order_number} не найден")
+        self.order_number = order_number
+
+
+class InvalidOrderStateError(RestaurantError):
+    def __init__(self, order_number: int, status: str, action: str) -> None:
+        super().__init__(f"Заказ №{order_number}: нельзя выполнить действие «{action}» в статусе «{status}»")
+        self.order_number = order_number
+        self.status = status
+        self.action = action
+
+
+class PaymentDeclinedError(RestaurantError):
+    def __init__(self, reason: str) -> None:
+        super().__init__(f"Платёж отклонён: {reason}")
+        self.reason = reason
+
+
+class InvalidPromoCodeError(RestaurantError):
+    def __init__(self, code: str, reason: str) -> None:
+        super().__init__(f"Промокод «{code}» недействителен: {reason}")
+        self.code = code
+        self.reason = reason
+
+
+class KitchenOverloadError(RestaurantError):
+    def __init__(self, station_name: str, reason: str) -> None:
+        super().__init__(f"Станция «{station_name}» перегружена: {reason}")
+        self.station_name = station_name
+        self.reason = reason

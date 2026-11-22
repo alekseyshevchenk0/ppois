@@ -10,15 +10,19 @@ from restaurant.catalog.nutrition import EMPTY_NUTRITION, NutritionInfo
 from restaurant.exceptions import InvalidDataError
 from restaurant.inventory.inventory import Inventory
 from restaurant.inventory.stock_item import QUANTITY_EPSILON
-from restaurant.validation import require_positive
+from restaurant.validation import require_non_empty, require_positive
+
+DEFAULT_STATION = "горячий цех"
 
 
 class Recipe:
-    def __init__(self, steps: Sequence[str], cooking_minutes: int, portions: int = 1) -> None:
+    def __init__(self, steps: Sequence[str], cooking_minutes: int, portions: int = 1, station: str = DEFAULT_STATION) -> None:
         if not steps:
             raise InvalidDataError("Recipe must have at least one step")
         require_positive(cooking_minutes, "cooking time")
         require_positive(portions, "portions")
+        require_non_empty(station, "station")
+        self.station = station
         self.steps = list(steps)
         self.cooking_minutes = cooking_minutes
         self.portions = portions
@@ -52,6 +56,7 @@ class Recipe:
         return total.scale(1 / self.portions)
 
     def cooking_time_for(self, portions: int) -> int:
+        """Minutes needed for `portions` portions: the dish is cooked in whole batches."""
         require_positive(portions, "portions")
         return self.cooking_minutes * math.ceil(portions / self.portions)
 

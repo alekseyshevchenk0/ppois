@@ -7,11 +7,11 @@ from restaurant.exceptions import InvalidDataError
 from restaurant.guests.customer import Customer
 from restaurant.guests.loyalty import LoyaltyTier
 from restaurant.hall.table import Table
+from restaurant.timeunits import SECONDS_IN_MINUTE
 from restaurant.validation import require_positive
 
 NO_CARD_PRIORITY = 0
 TIER_PRIORITY = {LoyaltyTier.BRONZE: 1, LoyaltyTier.SILVER: 2, LoyaltyTier.GOLD: 3}
-SECONDS_IN_MINUTE = 60
 
 
 @dataclass(frozen=True)
