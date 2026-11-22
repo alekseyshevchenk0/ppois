@@ -54,3 +54,11 @@ class InsufficientPointsError(RestaurantError):
         super().__init__(f"Not enough loyalty points: requested {requested}, available {available}")
         self.requested = requested
         self.available = available
+
+class UnderageGuestError(RestaurantError):
+    """Raised when alcohol is requested by a guest who is not an adult."""
+
+    def __init__(self, guest_name: str, age: int) -> None:
+        super().__init__(f"Guest '{guest_name}' is {age} years old and cannot be served alcohol")
+        self.guest_name = guest_name
+        self.age = age
