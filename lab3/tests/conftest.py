@@ -9,6 +9,12 @@ from restaurant.catalog.nutrition import NutritionInfo
 from restaurant.guests.customer import Customer
 from restaurant.inventory.inventory import Inventory
 from restaurant.inventory.supplier import Supplier
+from restaurant.guests.loyalty import LoyaltyCard
+from restaurant.hall.hall import Hall
+from restaurant.hall.reservation_book import ReservationBook
+from restaurant.hall.seating_planner import SeatingPlanner
+from restaurant.hall.table import Table
+from restaurant.hall.waitlist import Waitlist
 from restaurant.menu.dish import Dish
 from restaurant.menu.recipe import Recipe
 from restaurant.staff.bartender import Bartender
@@ -119,3 +125,55 @@ def adult_guest() -> Customer:
 @pytest.fixture
 def minor_guest() -> Customer:
     return Customer("Kolya", PHONE, MINOR_BIRTH, "kolya@example.com")
+
+
+@pytest.fixture
+def gold_guest() -> Customer:
+    guest = Customer("Gold", PHONE, ADULT_BIRTH, "gold@example.com")
+    card = LoyaltyCard("G-1", TODAY)
+    card.earn_points(Decimal(20000))
+    guest.attach_card(card)
+    return guest
+
+
+@pytest.fixture
+def small_table() -> Table:
+    return Table(1, 2)
+
+
+@pytest.fixture
+def window_table() -> Table:
+    return Table(2, 3, near_window=True)
+
+
+@pytest.fixture
+def medium_table() -> Table:
+    return Table(3, 4)
+
+
+@pytest.fixture
+def big_table() -> Table:
+    return Table(4, 8)
+
+
+@pytest.fixture
+def main_hall(small_table: Table, window_table: Table, medium_table: Table, big_table: Table) -> Hall:
+    hall = Hall("Основной")
+    for table in (small_table, window_table, medium_table, big_table):
+        hall.add_table(table)
+    return hall
+
+
+@pytest.fixture
+def book() -> ReservationBook:
+    return ReservationBook()
+
+
+@pytest.fixture
+def waitlist() -> Waitlist:
+    return Waitlist()
+
+
+@pytest.fixture
+def planner(main_hall: Hall, book: ReservationBook, waitlist: Waitlist) -> SeatingPlanner:
+    return SeatingPlanner([main_hall], book, waitlist)
