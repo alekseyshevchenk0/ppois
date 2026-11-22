@@ -1,6 +1,8 @@
+"""Domain exceptions of the restaurant system."""
 from __future__ import annotations
 
 from collections.abc import Iterable
+from datetime import datetime
 
 
 class RestaurantError(Exception):
@@ -39,6 +41,7 @@ class AllergenConflictError(RestaurantError):
         self.dish_name = dish_name
         self.allergen_names = names
 
+
 class EmployeeNotAvailableError(RestaurantError):
     """Raised when an employee cannot take a shift or a task."""
 
@@ -46,6 +49,7 @@ class EmployeeNotAvailableError(RestaurantError):
         super().__init__(f"Employee '{employee_name}' is not available: {reason}")
         self.employee_name = employee_name
         self.reason = reason
+
 
 class InsufficientPointsError(RestaurantError):
     """Raised when a loyalty card has fewer points than the guest wants to spend."""
@@ -55,6 +59,7 @@ class InsufficientPointsError(RestaurantError):
         self.requested = requested
         self.available = available
 
+
 class UnderageGuestError(RestaurantError):
     """Raised when alcohol is requested by a guest who is not an adult."""
 
@@ -62,3 +67,17 @@ class UnderageGuestError(RestaurantError):
         super().__init__(f"Guest '{guest_name}' is {age} years old and cannot be served alcohol")
         self.guest_name = guest_name
         self.age = age
+
+
+class TableUnavailableError(RestaurantError):
+    def __init__(self, subject: str, reason: str) -> None:
+        super().__init__(f"{subject} недоступен: {reason}")
+        self.subject = subject
+        self.reason = reason
+
+
+class ReservationConflictError(RestaurantError):
+    def __init__(self, table_number: int, start: datetime) -> None:
+        super().__init__(f"Стол №{table_number} уже занят на {start:%d.%m.%Y %H:%M}")
+        self.table_number = table_number
+        self.start = start
