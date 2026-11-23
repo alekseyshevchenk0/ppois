@@ -15,7 +15,10 @@ from restaurant.hall.reservation_book import ReservationBook
 from restaurant.hall.seating_planner import SeatingPlanner
 from restaurant.hall.table import Table
 from restaurant.hall.waitlist import Waitlist
+from restaurant.kitchen.kitchen import Kitchen
+from restaurant.kitchen.kitchen_station import KitchenStation
 from restaurant.menu.dish import Dish
+from restaurant.orders.order import Order
 from restaurant.menu.recipe import Recipe
 from restaurant.staff.bartender import Bartender
 from restaurant.staff.cashier import Cashier
@@ -23,7 +26,7 @@ from restaurant.staff.chef import Chef
 from restaurant.staff.cook import Cook
 from restaurant.staff.manager import ApprovalLimits, Manager
 from restaurant.staff.waiter import Waiter
-from tests.constants import ADULT_BIRTH, HIRED_ON, HOURLY_RATE, MINOR_BIRTH, PHONE, TODAY
+from tests.constants import ADULT_BIRTH, COLD_STATION, HIRED_ON, HOT_STATION, HOURLY_RATE, MINOR_BIRTH, NOW, PHONE, TODAY
 
 
 @pytest.fixture
@@ -71,7 +74,7 @@ def pancake_recipe(flour: Ingredient, milk: Ingredient) -> Recipe:
 
 @pytest.fixture
 def salad_recipe(tomato: Ingredient) -> Recipe:
-    recipe = Recipe(["Slice"], cooking_minutes=5)
+    recipe = Recipe(["Slice"], cooking_minutes=5, station=COLD_STATION)
     recipe.add_requirement(tomato, 150)
     return recipe
 
@@ -177,3 +180,47 @@ def waitlist() -> Waitlist:
 @pytest.fixture
 def planner(main_hall: Hall, book: ReservationBook, waitlist: Waitlist) -> SeatingPlanner:
     return SeatingPlanner([main_hall], book, waitlist)
+
+
+@pytest.fixture
+def stocked_inventory(inventory: Inventory, flour: Ingredient, milk: Ingredient, tomato: Ingredient) -> Inventory:
+    for ingredient in (flour, milk, tomato):
+        inventory.receive(ingredient, 5000, TODAY)
+    return inventory
+
+
+@pytest.fixture
+def order(medium_table: Table, waiter: Waiter, adult_guest: Customer) -> Order:
+    return Order(1, medium_table, waiter, adult_guest, NOW)
+
+
+@pytest.fixture
+def hot_cook() -> Cook:
+    return Cook("Ivan", PHONE, ADULT_BIRTH, HOURLY_RATE, HIRED_ON, station=HOT_STATION)
+
+
+@pytest.fixture
+def cold_cook() -> Cook:
+    return Cook("Dasha", PHONE, ADULT_BIRTH, HOURLY_RATE, HIRED_ON, station=COLD_STATION)
+
+
+@pytest.fixture
+def hot_station(hot_cook: Cook) -> KitchenStation:
+    station = KitchenStation(HOT_STATION, 60)
+    station.add_cook(hot_cook)
+    return station
+
+
+@pytest.fixture
+def cold_station(cold_cook: Cook) -> KitchenStation:
+    station = KitchenStation(COLD_STATION, 60)
+    station.add_cook(cold_cook)
+    return station
+
+
+@pytest.fixture
+def kitchen(stocked_inventory: Inventory, hot_station: KitchenStation, cold_station: KitchenStation) -> Kitchen:
+    kitchen = Kitchen(stocked_inventory)
+    kitchen.add_station(hot_station)
+    kitchen.add_station(cold_station)
+    return kitchen

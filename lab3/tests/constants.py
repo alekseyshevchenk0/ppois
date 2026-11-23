@@ -9,3 +9,5 @@ HOURLY_RATE = Decimal("10.00")
 PHONE = "+375291234567"
 EVENING = datetime(2026, 11, 21, 19, 0)
 NOW = datetime(2026, 11, 21, 12, 0)
+HOT_STATION = "горячий цех"
+COLD_STATION = "холодный цех"
