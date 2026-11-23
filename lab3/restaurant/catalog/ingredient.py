@@ -1,4 +1,3 @@
-"""Ingredient description."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -11,8 +10,6 @@ from restaurant.validation import require_non_empty, require_positive
 
 @dataclass(frozen=True)
 class Ingredient:
-    """A product the kitchen cooks with. Nutrition is given per one unit (e.g. per gram)."""
-
     name: str
     unit: str
     nutrition_per_unit: NutritionInfo

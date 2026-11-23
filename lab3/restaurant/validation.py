@@ -1,4 +1,3 @@
-"""Small validation helpers shared by all domain classes."""
 from __future__ import annotations
 
 from decimal import Decimal

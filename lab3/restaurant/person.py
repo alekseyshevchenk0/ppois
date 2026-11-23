@@ -1,4 +1,3 @@
-"""Base class for every human in the restaurant."""
 from __future__ import annotations
 
 from datetime import date
@@ -9,7 +8,6 @@ ADULT_AGE = 18
 
 
 class Person:
-    """A person with a name, a phone number and a birth date."""
 
     def __init__(self, name: str, phone: str, birth_date: date) -> None:
         require_non_empty(name, "person name")
