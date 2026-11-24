@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import date
 from restaurant.catalog.ingredient import Ingredient
-from restaurant.exceptions import InvalidDataError
 from restaurant.validation import require_non_empty, require_positive
 
 

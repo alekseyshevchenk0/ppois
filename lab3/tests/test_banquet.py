@@ -12,6 +12,7 @@ from tests.constants import EVENING
 
 PRICE = Decimal(50)
 
+
 def make_banquet(organizer: Customer, hall: Hall, guests_count: int) -> Banquet:
     return Banquet(organizer, hall, EVENING, guests_count, PRICE)
 
