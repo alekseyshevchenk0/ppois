@@ -125,7 +125,8 @@ def test_invalid_choice_and_non_integer_input() -> None:
 def test_demo_application_is_configured() -> None:
     app = create_demo_app()
     assert app.menu.name == "Основное меню"
-    assert len(app.menu.all_dishes()) == 1
+    assert len(app.menu.all_dishes()) == 15
+    assert len(app.menu.available_dishes(app.inventory, app.today)) == 15
     assert app.inventory.stock_report(app.today)
 
 
