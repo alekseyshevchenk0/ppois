@@ -6,13 +6,26 @@ from typing import Callable
 
 from restaurant.analytics.dynamic_pricer import DynamicPricer
 from restaurant.analytics.menu_recommender import MenuRecommender
+from restaurant.analytics.review import Review
+from restaurant.analytics.sales_report import SalesReport
+from restaurant.catalog.ingredient import Ingredient
+from restaurant.delivery.courier import Courier
+from restaurant.delivery.delivery_order import DeliveryOrder
 from restaurant.exceptions import RestaurantError
 from restaurant.guests.customer import Customer
+from restaurant.hall.reservation import Reservation
+from restaurant.hall.reservation_book import ReservationBook
 from restaurant.hall.table import Table
 from restaurant.inventory.inventory import Inventory
+from restaurant.kitchen.kitchen import Kitchen
 from restaurant.menu.dish import Dish
 from restaurant.menu.menu import Menu
-from restaurant.orders.order import Order
+from restaurant.kitchen.kitchen_station import KitchenStation
+from restaurant.orders.bill import Bill
+from restaurant.orders.order import Order, OrderStatus
+from restaurant.orders.payment import Payment, PaymentMethod
+from restaurant.staff.cashier import Cashier
+from restaurant.staff.cook import Cook
 from restaurant.staff.waiter import Waiter
 
 
@@ -26,84 +39,90 @@ class RestaurantApp:
         today: date | None = None,
         input_fn: Callable[[str], str] = input,
         output_fn: Callable[[str], None] = print,
+        cashier: Cashier | None = None,
+        couriers: list[Courier] | None = None,
+        kitchen: Kitchen | None = None,
     ) -> None:
-        self.menu = menu
-        self.inventory = inventory
-        self.waiter = waiter
-        self.table = table
-        self.today = today or date.today()
-        self.input_fn, self.output_fn = input_fn, output_fn
-        self.orders: list[Order] = []
-        self._next_order_number = 1
+        self._initialize_dependencies(menu, inventory, waiter, table, today, input_fn, output_fn)
+        self._initialize_records(cashier, couriers, kitchen)
+        self.reservation_book = ReservationBook()
         self.recommender = MenuRecommender(menu)
         self.pricer = self._create_pricer()
+
+    def _initialize_dependencies(
+        self, menu: Menu, inventory: Inventory, waiter: Waiter, table: Table, today: date | None,
+        input_fn: Callable[[str], str], output_fn: Callable[[str], None],
+    ) -> None:
+        self.menu, self.inventory = menu, inventory
+        self.waiter, self.table = waiter, table
+        self.today = today or date.today()
+        self.input_fn, self.output_fn = input_fn, output_fn
+
+    def _initialize_records(
+        self, cashier: Cashier | None, couriers: list[Courier] | None, kitchen: Kitchen | None
+    ) -> None:
+        self.cashier, self.couriers, self.kitchen = cashier, couriers or [], kitchen
+        self.orders, self.reservations, self.payments = [], [], []
+        self.reviews, self.deliveries = [], []
+        self._next_order_number, self._next_delivery_number = 1, 1
 
     @staticmethod
     def _create_pricer() -> DynamicPricer:
         return DynamicPricer(
-            happy_hours=(time(14), time(16)),
-            happy_discount=Decimal("10"),
-            peak_hours=(time(18), time(21)),
-            peak_surcharge=Decimal("10"),
-            expiry_discount=Decimal("15"),
-            expiry_threshold_days=2,
+            happy_hours=(time(14), time(16)), happy_discount=Decimal("10"),
+            peak_hours=(time(18), time(21)), peak_surcharge=Decimal("10"),
+            expiry_discount=Decimal("15"), expiry_threshold_days=2,
         )
 
     def run(self) -> None:
-        self.output_fn("Cистема управления рестораном")
+        self.output_fn("Добро пожаловать в систему управления рестораном!")
         while True:
             self._show_main_menu()
             choice = self._read_int("Выберите действие: ")
             if choice == 0:
-                self.output_fn("Работа программы завершена")
+                self.output_fn("Работа программы завершена.")
                 return
             self._dispatch(choice)
 
     def _show_main_menu(self) -> None:
         self.output_fn(
             "\nГЛАВНОЕ МЕНЮ\n"
-            "1. Показать меню ресторана\n"
-            "2. Показать доступные блюда\n"
-            "3. Посмотреть остатки склада\n"
-            "4. Создать заказ\n"
-            "5. Посмотреть заказы\n"
-            "6. Получить рекомендации\n"
-            "7. Показать динамические цены\n"
-            "0. Выход"
+            "1. Показать меню ресторана\n2. Показать доступные блюда\n"
+            "3. Посмотреть остатки склада\n4. Создать заказ\n5. Посмотреть заказы\n"
+            "6. Получить рекомендации\n7. Показать динамические цены\n"
+            "8. Управление приготовлением и подачей заказа\n9. Оплатить заказ\n10. Создать бронирование\n"
+            "11. Отзывы о блюдах\n12. Отчёт о продажах\n13. Управление доставкой\n"
+            "14. Показать стоп-лист\n15. Управление бронированиями\n0. Выход"
         )
 
     def _dispatch(self, choice: int) -> None:
         actions = {
-            1: self._show_dishes,
-            2: self._show_available_dishes,
-            3: self._show_inventory,
-            4: self._create_order,
-            5: self._show_orders,
-            6: self._show_recommendations,
-            7: self._show_dynamic_prices,
+            1: self._show_dishes, 2: self._show_available_dishes, 3: self._show_inventory,
+            4: self._create_order, 5: self._show_orders, 6: self._show_recommendations,
+            7: self._show_dynamic_prices, 8: self._advance_order, 9: self._pay_order,
+            10: self._create_reservation, 11: self._manage_reviews, 12: self._show_sales_report,
+            13: self._manage_delivery, 14: self._show_stop_list, 15: self._manage_reservations,
         }
         action = actions.get(choice)
         if action is None:
-            self.output_fn("Неизвестный пункт меню. Повторите ввод")
+            self.output_fn("Неизвестный пункт меню. Повторите ввод.")
             return
         try:
             action()
-        except RestaurantError as error:
+        except (RestaurantError, ValueError) as error:
             self.output_fn(f"Ошибка: {error}")
 
     def _show_dishes(self) -> None:
-        dishes = self.menu.all_dishes()
-        self._print_dishes(dishes)
+        self._print_dishes(self.menu.all_dishes())
 
     def _show_available_dishes(self) -> None:
-        dishes = self.menu.available_dishes(self.inventory, self.today)
         self.output_fn("Доступные блюда:")
-        self._print_dishes(dishes)
+        self._print_dishes(self.menu.available_dishes(self.inventory, self.today))
 
     def _show_inventory(self) -> None:
         report = self.inventory.stock_report(self.today)
         if not report:
-            self.output_fn("Склад пока пуст")
+            self.output_fn("Склад пока пуст.")
             return
         for ingredient, quantity in sorted(report.items(), key=lambda item: item[0].name):
             self.output_fn(f"{ingredient.name}: {quantity:g} {ingredient.unit}")
@@ -111,25 +130,23 @@ class RestaurantApp:
     def _create_order(self) -> None:
         dishes = self.menu.available_dishes(self.inventory, self.today)
         if not dishes:
-            self.output_fn("Сейчас нет доступных блюд для заказа")
+            self.output_fn("Сейчас нет доступных блюд для заказа.")
             return
         self._print_dishes(dishes)
         index = self._read_int("Введите номер блюда: ")
         if not 1 <= index <= len(dishes):
-            self.output_fn("Блюда с таким номером нет")
+            self.output_fn("Блюда с таким номером нет.")
             return
         quantity = self._read_int("Введите количество порций: ")
         if quantity <= 0:
-            self.output_fn("Количество порций должно быть положительным")
+            self.output_fn("Количество порций должно быть положительным.")
             return
         self._save_order(dishes[index - 1], quantity)
 
     def _save_order(self, dish: Dish, quantity: int) -> None:
-        guest_name = self.input_fn("Введите имя гостя: ").strip()
-        if not guest_name:
-            self.output_fn("Имя гостя не должно быть пустым")
+        guest = self._read_guest()
+        if guest is None:
             return
-        guest = Customer(guest_name, "+375330000000", date(2000, 1, 1), "guest@example.com")
         order = Order(self._next_order_number, self.table, self.waiter, guest, datetime.now())
         order.add_item(dish, quantity)
         self.orders.append(order)
@@ -138,17 +155,19 @@ class RestaurantApp:
 
     def _show_orders(self) -> None:
         if not self.orders:
-            self.output_fn("Заказов пока нет")
+            self.output_fn("Заказов пока нет.")
             return
         for order in self.orders:
-            self.output_fn(
-                f"Заказ №{order.number} | гость: {order.guest.name} | "
-                f"статус: {order.status.value} | сумма: {order.subtotal():.2f} руб."
-            )
+            self._print_order(order)
+
+    def _print_order(self, order: Order) -> None:
+        self.output_fn(
+            f"Заказ №{order.number} | гость: {order.guest.name} | "
+            f"статус: {order.status.value} | сумма: {order.subtotal():.2f} руб."
+        )
 
     def _show_recommendations(self) -> None:
-        guest_name = self.input_fn("Введите имя гостя: ").strip() or "Гость"
-        guest = Customer(guest_name, "+3750000000", date(2000, 1, 1), "guest@example.com")
+        guest = self._read_guest(allow_empty=True)
         dishes = self.recommender.recommend(guest, inventory=self.inventory, today=self.today)
         self.output_fn("Рекомендации для гостя:")
         self._print_dishes(dishes)
@@ -156,16 +175,295 @@ class RestaurantApp:
     def _show_dynamic_prices(self) -> None:
         dishes = self.menu.available_dishes(self.inventory, self.today)
         if not dishes:
-            self.output_fn("Нет доступных блюд для расчёта цен")
+            self.output_fn("Нет доступных блюд для расчёта цен.")
             return
-        moment = datetime.now()
         for dish in dishes:
-            price = self.pricer.price_for(dish, moment, self.inventory)
+            price = self.pricer.price_for(dish, datetime.now(), self.inventory)
             self.output_fn(f"{dish.name}: {price:.2f} руб.")
+
+    def _advance_order(self) -> None:
+        order = self._select_order()
+        if order is None:
+            return
+        transitions = {
+            OrderStatus.NEW: (lambda: self._send_order_to_kitchen(order), "Заказ отправлен на кухню."),
+            OrderStatus.IN_PROGRESS: (lambda: self._finish_kitchen_order(order), "Приготовление завершено."),
+            OrderStatus.READY: (order.mark_served, "Заказ подан гостю."),
+        }
+        transition = transitions.get(order.status)
+        self._apply_order_transition(order, transition)
+
+    def _send_order_to_kitchen(self, order: Order) -> None:
+        if self.kitchen is not None:
+            self.kitchen.accept_order(order, datetime.now())
+            return
+        order.validate_for_kitchen()
+        self.inventory.consume_all(self._order_requirements(order), self.today)
+        order.send_to_kitchen()
+
+    def _finish_kitchen_order(self, order: Order) -> None:
+        if self.kitchen is None:
+            order.mark_ready()
+            return
+        for ticket in self.kitchen.tickets_of(order.number):
+            if not ticket.is_done:
+                self.kitchen.finish_ticket(ticket, datetime.now())
+
+    def _order_requirements(self, order: Order) -> dict[Ingredient, float]:
+        requirements = {}
+        for item in order.items:
+            for ingredient, amount in item.dish.recipe.requirements_for(item.quantity).items():
+                requirements[ingredient] = requirements.get(ingredient, 0) + amount
+        return requirements
+
+    def _apply_order_transition(self, order: Order, transition: tuple[Callable[[], None], str] | None) -> None:
+        if transition is None:
+            self.output_fn(f"Для заказа №{order.number} нет доступного перехода.")
+            return
+        transition[0]()
+        self.output_fn(transition[1])
+
+    def _pay_order(self) -> None:
+        order = self._select_order()
+        if order is None:
+            return
+        bill = Bill(order)
+        self._process_payment(bill)
+
+    def _process_payment(self, bill: Bill) -> None:
+        if bill.order.status is not OrderStatus.SERVED:
+            self.output_fn("Оплатить можно только заказ, который уже подан гостю.")
+            return
+        method = self._read_payment_method()
+        if method is None:
+            return
+        self._complete_payment(bill, method)
+
+    def _complete_payment(self, bill: Bill, method: PaymentMethod) -> None:
+        due = bill.total_with_tip()
+        tendered = self._read_money("Внесённая сумма: ") if method is PaymentMethod.CASH else due
+        payment = Payment(bill, method, tendered, datetime.now())
+        payment.process(self.cashier)
+        self.payments.append(payment)
+        self._print_receipt(bill, payment)
+
+    def _print_receipt(self, bill: Bill, payment: Payment) -> None:
+        self.output_fn("ЧЕК")
+        for line in bill.receipt_lines():
+            self.output_fn(line)
+        self.output_fn(f"Способ оплаты: {payment.method.value}")
+        if payment.change:
+            self.output_fn(f"Сдача: {payment.change:.2f} руб.")
+
+    def _create_reservation(self) -> None:
+        guest = self._read_guest()
+        if guest is None:
+            return
+        guests_count = self._read_int("Количество гостей: ")
+        start = datetime.fromisoformat(self.input_fn("Дата и время (ГГГГ-ММ-ДД ЧЧ:ММ): "))
+        reservation = self.reservation_book.book(guest, self.table, start, guests_count)
+        self.reservations.append(reservation)
+        self.output_fn(f"Бронирование создано. Стол №{self.table.number}.")
+
+    def _manage_reservations(self) -> None:
+        self.output_fn("1. Показать бронирования\n2. Отметить прибытие гостя\n3. Отменить бронирование")
+        choice = self._read_int("Выберите действие: ")
+        if choice == 1:
+            self._show_reservations()
+        elif choice in (2, 3):
+            self._update_reservation(choice)
+        else:
+            self.output_fn("Неизвестный пункт меню.")
+
+    def _update_reservation(self, choice: int) -> None:
+        reservation = self._select_reservation()
+        if reservation is None:
+            return
+        reservation.mark_arrived() if choice == 2 else self.reservation_book.cancel(reservation)
+        message = "Прибытие гостя отмечено." if choice == 2 else "Бронирование отменено."
+        self.output_fn(message)
+
+    def _select_reservation(self) -> Reservation | None:
+        if not self.reservations:
+            self.output_fn("Бронирований пока нет.")
+            return None
+        self._show_reservations()
+        guest_name = self.input_fn("Введите имя гостя: ").strip()
+        reservation = next((item for item in self.reservations if item.guest.name == guest_name), None)
+        if reservation is None:
+            self.output_fn("Бронирование для этого гостя не найдено.")
+        return reservation
+
+    def _show_reservations(self) -> None:
+        if not self.reservations:
+            self.output_fn("Бронирований пока нет.")
+            return
+        for reservation in self.reservations:
+            self._print_reservation(reservation)
+
+    def _print_reservation(self, reservation: Reservation) -> None:
+        status = "отменено" if reservation.is_cancelled else "активно"
+        self.output_fn(
+            f"{reservation.start:%d.%m.%Y %H:%M} | {reservation.guest.name} | "
+            f"стол №{reservation.table.number} | гостей: {reservation.guests_count} | {status}"
+        )
+
+    def _manage_reviews(self) -> None:
+        self.output_fn("1. Оставить отзыв\n2. Показать одобренные отзывы")
+        choice = self._read_int("Выберите действие: ")
+        if choice == 1:
+            self._create_review()
+        elif choice == 2:
+            self._show_reviews()
+        else:
+            self.output_fn("Неизвестный пункт меню.")
+
+    def _create_review(self) -> None:
+        dishes = self.menu.all_dishes()
+        self._print_dishes(dishes)
+        index = self._read_int("Номер блюда: ")
+        if not 1 <= index <= len(dishes):
+            self.output_fn("Блюда с таким номером нет.")
+            return
+        guest = self._read_guest()
+        if guest is None:
+            return
+        rating = self._read_int("Оценка от 1 до 5: ")
+        review = Review(guest, dishes[index - 1], rating, self.input_fn("Комментарий: "), self.today)
+        review.approve()
+        self.reviews.append(review)
+        self.output_fn("Спасибо! Отзыв опубликован.")
+
+    def _show_reviews(self) -> None:
+        visible = [review for review in self.reviews if review.is_visible()]
+        if not visible:
+            self.output_fn("Опубликованных отзывов пока нет.")
+            return
+        for review in visible:
+            self.output_fn(f"{review.dish.name} | {review.customer.name} | {review.rating}/5 | {review.comment}")
+
+    def _show_sales_report(self) -> None:
+        report = SalesReport(self.payments, self.today, self.today)
+        self.output_fn(f"Заказов оплачено: {report.orders_count()}")
+        self.output_fn(f"Выручка: {report.total_revenue():.2f} руб.")
+        self.output_fn(f"Средний чек: {report.average_check():.2f} руб.")
+        self._print_popular_dishes(report)
+
+    def _print_popular_dishes(self, report: SalesReport) -> None:
+        for name, quantity in report.popular_dishes():
+            self.output_fn(f"{name}: {quantity} порц.")
+
+    def _manage_delivery(self) -> None:
+        self.output_fn("1. Создать и выполнить доставку\n2. Показать доставки")
+        choice = self._read_int("Выберите действие: ")
+        if choice == 1:
+            self._create_delivery()
+        elif choice == 2:
+            self._show_deliveries()
+        else:
+            self.output_fn("Неизвестный пункт меню.")
+
+    def _create_delivery(self) -> None:
+        courier = self._select_courier()
+        if courier is None:
+            return
+        guest = self._read_guest()
+        if guest is None:
+            return
+        dish = self._select_dish()
+        if dish is None:
+            return
+        delivery = self._build_delivery(guest, dish)
+        delivery.assign_courier(courier)
+        delivery.pick_up()
+        delivery.deliver()
+        self.deliveries.append(delivery)
+        self.output_fn(f"Доставка №{delivery.number} завершена. Сумма: {delivery.total():.2f} руб.")
+
+    def _build_delivery(self, guest: Customer, dish: Dish) -> DeliveryOrder:
+        address = self.input_fn("Адрес доставки: ").strip()
+        quantity = self._read_int("Количество порций: ")
+        delivery = DeliveryOrder(
+            self._next_delivery_number, guest, address, datetime.now(), Decimal("5.00")
+        )
+        delivery.add_item(dish, quantity)
+        self._next_delivery_number += 1
+        return delivery
+
+    def _show_deliveries(self) -> None:
+        if not self.deliveries:
+            self.output_fn("Доставок пока нет.")
+            return
+        for delivery in self.deliveries:
+            self.output_fn(
+                f"Доставка №{delivery.number} | {delivery.customer.name} | "
+                f"{delivery.address} | {delivery.status.value} | {delivery.total():.2f} руб."
+            )
+
+    def _show_stop_list(self) -> None:
+        stop_list = self.menu.stop_list(self.inventory, self.today)
+        if not stop_list:
+            self.output_fn("Стоп-лист пуст. Все блюда обеспечены ингредиентами.")
+            return
+        for dish_name, missing in stop_list.items():
+            details = ", ".join(f"{item.name}: {amount:g} {item.unit}" for item, amount in missing.items())
+            self.output_fn(f"{dish_name}: не хватает {details}")
+
+    def _select_order(self) -> Order | None:
+        if not self.orders:
+            self.output_fn("Заказов пока нет.")
+            return None
+        self._show_orders()
+        number = self._read_int("Введите номер заказа: ")
+        order = next((item for item in self.orders if item.number == number), None)
+        if order is None:
+            self.output_fn("Заказ с таким номером не найден.")
+        return order
+
+    def _select_dish(self) -> Dish | None:
+        dishes = self.menu.available_dishes(self.inventory, self.today)
+        self._print_dishes(dishes)
+        index = self._read_int("Номер блюда: ")
+        if not 1 <= index <= len(dishes):
+            self.output_fn("Блюда с таким номером нет.")
+            return None
+        return dishes[index - 1]
+
+    def _select_courier(self) -> Courier | None:
+        available = [courier for courier in self.couriers if courier.is_available()]
+        if not available:
+            self.output_fn("Нет свободных курьеров.")
+            return None
+        for index, courier in enumerate(available, 1):
+            self.output_fn(f"{index}. {courier.name} ({courier.transport})")
+        choice = self._read_int("Выберите курьера: ")
+        if not 1 <= choice <= len(available):
+            self.output_fn("Курьер с таким номером не найден.")
+            return None
+        return available[choice - 1]
+
+    def _read_guest(self, allow_empty: bool = False) -> Customer | None:
+        name = self.input_fn("Введите имя гостя: ").strip()
+        if not name and not allow_empty:
+            self.output_fn("Имя гостя не должно быть пустым.")
+            return None
+        return Customer(name or "Гость", "+70000000000", date(2000, 1, 1), "guest@example.com")
+
+    def _read_payment_method(self) -> PaymentMethod | None:
+        self.output_fn("1. Наличные\n2. Карта\n3. Бонусные баллы")
+        choice = self._read_int("Способ оплаты: ")
+        methods = {1: PaymentMethod.CASH, 2: PaymentMethod.CARD, 3: PaymentMethod.POINTS}
+        method = methods.get(choice)
+        if method is None:
+            self.output_fn("Неизвестный способ оплаты.")
+        return method
+
+    def _read_money(self, prompt: str) -> Decimal:
+        return Decimal(self.input_fn(prompt).replace(",", "."))
 
     def _print_dishes(self, dishes: list[Dish]) -> None:
         if not dishes:
-            self.output_fn("Список пуст")
+            self.output_fn("Список пуст.")
             return
         for index, dish in enumerate(dishes, start=1):
             status = "стоп-лист" if dish.is_stopped else "доступно"
@@ -175,5 +473,5 @@ class RestaurantApp:
         try:
             return int(self.input_fn(prompt))
         except ValueError:
-            self.output_fn("Нужно ввести целое число")
+            self.output_fn("Нужно ввести целое число.")
             return -1
