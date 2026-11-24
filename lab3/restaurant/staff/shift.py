@@ -1,4 +1,3 @@
-"""A working shift of one employee."""
 from __future__ import annotations
 
 from datetime import date, time
@@ -21,7 +20,6 @@ def overlap_hours(first_start: float, first_end: float, second_start: float, sec
 
 
 class Shift:
-    """One employee works on one day from `start` to `end` (shifts do not cross midnight)."""
 
     def __init__(self, employee: Employee, day: date, start: time, end: time) -> None:
         if end <= start:

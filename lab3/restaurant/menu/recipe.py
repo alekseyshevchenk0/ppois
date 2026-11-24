@@ -56,7 +56,6 @@ class Recipe:
         return total.scale(1 / self.portions)
 
     def cooking_time_for(self, portions: int) -> int:
-        """Minutes needed for `portions` portions: the dish is cooked in whole batches."""
         require_positive(portions, "количество порций")
         return self.cooking_minutes * math.ceil(portions / self.portions)
 
