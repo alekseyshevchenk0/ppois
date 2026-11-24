@@ -29,6 +29,6 @@ class Bartender(Employee):
 
     def _check_alcohol_rules(self, guest: Customer, today: date) -> None:
         if not self.is_alcohol_certified:
-            raise EmployeeNotAvailableError(self.name, "no alcohol certificate")
+            raise EmployeeNotAvailableError(self.name, "нет сертификата на продажу алкоголя")
         if not guest.is_adult(today):
             raise UnderageGuestError(guest.name, guest.age_on(today))

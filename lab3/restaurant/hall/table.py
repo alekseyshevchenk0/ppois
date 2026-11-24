@@ -6,8 +6,8 @@ from restaurant.validation import require_positive
 
 class Table:
     def __init__(self, number: int, capacity: int, near_window: bool = False) -> None:
-        require_positive(number, "table number")
-        require_positive(capacity, "table capacity")
+        require_positive(number, "номер стола")
+        require_positive(capacity, "вместимость стола")
         self.number = number
         self.capacity = capacity
         self.near_window = near_window

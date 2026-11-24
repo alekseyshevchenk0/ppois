@@ -22,7 +22,7 @@ class Inventory:
         return batch
 
     def set_reorder_level(self, ingredient: Ingredient, level: float) -> None:
-        require_non_negative(level, "reorder level")
+        require_non_negative(level, "порог заказа")
         self._reorder_levels[ingredient] = level
 
     def total_of(self, ingredient: Ingredient, today: date) -> float:
@@ -36,7 +36,7 @@ class Inventory:
         return self.total_of(ingredient, today) + QUANTITY_EPSILON >= amount
 
     def consume(self, ingredient: Ingredient, amount: float, today: date) -> None:
-        require_positive(amount, "consumed amount")
+        require_positive(amount, "расходуемое количество")
         self._require_available(ingredient, amount, today)
         remaining = amount
         for batch in self._fresh_batches(ingredient, today):

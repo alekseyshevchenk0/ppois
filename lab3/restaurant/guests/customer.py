@@ -16,7 +16,7 @@ class Customer(Person):
     def __init__(self, name: str, phone: str, birth_date: date, email: str, profile: GuestProfile | None = None) -> None:
         super().__init__(name, phone, birth_date)
         if "@" not in email:
-            raise InvalidDataError(f"'{email}' is not a valid email")
+            raise InvalidDataError(f"Адрес электронной почты «{email}» некорректен")
         self.email = email
         self.profile = profile or GuestProfile()
         self.visits_count = 0
@@ -30,7 +30,7 @@ class Customer(Person):
 
     def attach_card(self, card: LoyaltyCard) -> None:
         if self.loyalty_card is not None:
-            raise InvalidDataError(f"Guest '{self.name}' already has a loyalty card")
+            raise InvalidDataError(f"У гостя «{self.name}» уже есть карта лояльности")
         self.loyalty_card = card
 
     def can_eat(self, dish: Dish) -> bool:

@@ -35,7 +35,7 @@ def test_ensure_safe_for(pancakes: Dish) -> None:
     pancakes.ensure_safe_for([Allergen.NUTS])
     with pytest.raises(AllergenConflictError) as error:
         pancakes.ensure_safe_for([Allergen.MILK, Allergen.NUTS])
-    assert error.value.allergen_names == "milk"
+    assert error.value.allergen_names == "молоко"
 
 
 def test_availability_depends_on_stock_and_stop_flag(
@@ -62,10 +62,10 @@ def test_cook_consumes_one_portion(
 
 
 def test_cook_fails_when_stopped_or_missing(pancakes: Dish, inventory: Inventory, today: date) -> None:
-    with pytest.raises(DishUnavailableError, match="missing ingredients: flour, milk"):
+    with pytest.raises(DishUnavailableError, match="не хватает ингредиентов: flour, milk"):
         pancakes.cook(inventory, today)
     pancakes.stop()
-    with pytest.raises(DishUnavailableError, match="stopped"):
+    with pytest.raises(DishUnavailableError, match="стоп-листе"):
         pancakes.cook(inventory, today)
 
 

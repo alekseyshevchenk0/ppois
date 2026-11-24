@@ -18,9 +18,9 @@ class Ingredient:
     is_animal_origin: bool = False
 
     def __post_init__(self) -> None:
-        require_non_empty(self.name, "ingredient name")
-        require_non_empty(self.unit, "ingredient unit")
-        require_positive(self.shelf_life_days, "shelf life")
+        require_non_empty(self.name, "название ингредиента")
+        require_non_empty(self.unit, "единица измерения")
+        require_positive(self.shelf_life_days, "срок хранения")
 
     def contains_allergen(self, allergen: Allergen) -> bool:
         return allergen in self.allergens

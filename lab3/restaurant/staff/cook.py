@@ -22,9 +22,9 @@ class Cook(Employee):
         self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date, station: str, skill_level: int = BASELINE_SKILL
     ) -> None:
         super().__init__(name, phone, birth_date, hourly_rate, hire_date)
-        require_non_empty(station, "station")
+        require_non_empty(station, "станция")
         if not MIN_SKILL <= skill_level <= MAX_SKILL:
-            raise InvalidDataError(f"Skill level must be between {MIN_SKILL} and {MAX_SKILL}")
+            raise InvalidDataError(f"Уровень навыка должен быть от {MIN_SKILL} до {MAX_SKILL}")
         self.station = station
         self.skill_level = skill_level
 
@@ -32,12 +32,12 @@ class Cook(Employee):
         return self.station == station
 
     def move_to_station(self, station: str) -> None:
-        require_non_empty(station, "station")
+        require_non_empty(station, "станция")
         self.station = station
 
     def promote(self) -> None:
         if self.skill_level == MAX_SKILL:
-            raise InvalidDataError("Cook already has the maximum skill level")
+            raise InvalidDataError("Повар уже достиг максимального уровня навыка")
         self.skill_level += 1
 
     def speed_factor(self) -> float:

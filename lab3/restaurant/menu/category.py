@@ -11,7 +11,7 @@ from restaurant.validation import require_non_empty
 
 class MenuCategory:
     def __init__(self, name: str) -> None:
-        require_non_empty(name, "category name")
+        require_non_empty(name, "название категории")
         self.name = name
         self._dishes: list[Dish] = []
 
@@ -21,13 +21,13 @@ class MenuCategory:
 
     def add_dish(self, dish: Dish) -> None:
         if self.find_dish(dish.name) is not None:
-            raise InvalidDataError(f"Dish '{dish.name}' is already in category '{self.name}'")
+            raise InvalidDataError(f"Блюдо «{dish.name}» уже находится в категории «{self.name}»")
         self._dishes.append(dish)
 
     def remove_dish(self, name: str) -> Dish:
         dish = self.find_dish(name)
         if dish is None:
-            raise InvalidDataError(f"Dish '{name}' is not in category '{self.name}'")
+            raise InvalidDataError(f"Блюда «{name}» нет в категории «{self.name}»")
         self._dishes.remove(dish)
         return dish
 

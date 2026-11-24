@@ -30,9 +30,9 @@ class PurchaseOrder:
         return dict(self._lines)
 
     def add_line(self, ingredient: Ingredient, amount: float) -> None:
-        require_positive(amount, "ordered amount")
+        require_positive(amount, "заказываемое количество")
         if not self.supplier.supplies(ingredient):
-            raise InvalidDataError(f"Supplier '{self.supplier.name}' does not sell '{ingredient.name}'")
+            raise InvalidDataError(f"Поставщик «{self.supplier.name}» не продаёт ингредиент «{ingredient.name}»")
         self._lines[ingredient] = self._lines.get(ingredient, 0.0) + amount
 
     def total_cost(self) -> Decimal:
@@ -46,7 +46,7 @@ class PurchaseOrder:
 
     def receive_into(self, inventory: Inventory, received_on: date) -> None:
         if self.is_received:
-            raise InvalidDataError("Purchase order has already been received")
+            raise InvalidDataError("Заказ поставщику уже принят")
         for ingredient, amount in self._lines.items():
             inventory.receive(ingredient, amount, received_on)
         self.is_received = True

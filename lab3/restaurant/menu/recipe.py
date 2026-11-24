@@ -18,10 +18,10 @@ DEFAULT_STATION = "горячий цех"
 class Recipe:
     def __init__(self, steps: Sequence[str], cooking_minutes: int, portions: int = 1, station: str = DEFAULT_STATION) -> None:
         if not steps:
-            raise InvalidDataError("Recipe must have at least one step")
-        require_positive(cooking_minutes, "cooking time")
-        require_positive(portions, "portions")
-        require_non_empty(station, "station")
+            raise InvalidDataError("Рецепт должен содержать хотя бы один шаг")
+        require_positive(cooking_minutes, "время приготовления")
+        require_positive(portions, "количество порций")
+        require_non_empty(station, "станция")
         self.station = station
         self.steps = list(steps)
         self.cooking_minutes = cooking_minutes
@@ -29,14 +29,14 @@ class Recipe:
         self._requirements: dict[Ingredient, float] = {}
 
     def add_requirement(self, ingredient: Ingredient, amount: float) -> None:
-        require_positive(amount, "ingredient amount")
+        require_positive(amount, "количество ингредиента")
         self._requirements[ingredient] = self._requirements.get(ingredient, 0.0) + amount
 
     def ingredients(self) -> tuple[Ingredient, ...]:
         return tuple(self._requirements)
 
     def requirements_for(self, portions: int) -> dict[Ingredient, float]:
-        require_positive(portions, "portions")
+        require_positive(portions, "количество порций")
         factor = portions / self.portions
         return {ingredient: amount * factor for ingredient, amount in self._requirements.items()}
 
@@ -57,7 +57,7 @@ class Recipe:
 
     def cooking_time_for(self, portions: int) -> int:
         """Minutes needed for `portions` portions: the dish is cooked in whole batches."""
-        require_positive(portions, "portions")
+        require_positive(portions, "количество порций")
         return self.cooking_minutes * math.ceil(portions / self.portions)
 
     def missing_for(self, inventory: Inventory, today: date, portions: int = 1) -> dict[Ingredient, float]:

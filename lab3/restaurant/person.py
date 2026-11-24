@@ -10,8 +10,8 @@ ADULT_AGE = 18
 class Person:
 
     def __init__(self, name: str, phone: str, birth_date: date) -> None:
-        require_non_empty(name, "person name")
-        require_non_empty(phone, "person phone")
+        require_non_empty(name, "имя человека")
+        require_non_empty(phone, "телефон человека")
         self.name = name
         self.phone = phone
         self.birth_date = birth_date

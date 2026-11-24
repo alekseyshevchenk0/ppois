@@ -17,7 +17,7 @@ class Schedule:
         shift.employee.ensure_active()
         clashes = any(known.employee is shift.employee and known.overlaps(shift) for known in self._shifts)
         if clashes:
-            raise EmployeeNotAvailableError(shift.employee.name, "already has an overlapping shift")
+            raise EmployeeNotAvailableError(shift.employee.name, "уже назначена пересекающаяся смена")
         self._shifts.append(shift)
 
     def remove_shift(self, shift: Shift) -> None:

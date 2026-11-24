@@ -28,8 +28,8 @@ class Banquet:
         price_per_guest: Decimal,
         duration_minutes: int = BANQUET_DURATION_MINUTES,
     ) -> None:
-        require_positive(guests_count, "guests count")
-        require_positive(price_per_guest, "price per guest")
+        require_positive(guests_count, "количество гостей")
+        require_positive(price_per_guest, "цена на одного гостя")
         self.organizer = organizer
         self.hall = hall
         self.start = start

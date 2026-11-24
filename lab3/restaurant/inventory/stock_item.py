@@ -10,7 +10,7 @@ QUANTITY_EPSILON = 1e-9
 
 class StockItem:
     def __init__(self, ingredient: Ingredient, quantity: float, received_on: date) -> None:
-        require_positive(quantity, "batch quantity")
+        require_positive(quantity, "количество в партии")
         self.ingredient = ingredient
         self.quantity = quantity
         self.received_on = received_on

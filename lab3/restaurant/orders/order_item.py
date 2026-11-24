@@ -8,7 +8,7 @@ from restaurant.validation import require_positive
 
 class OrderItem:
     def __init__(self, dish: Dish, quantity: int, note: str = "") -> None:
-        require_positive(quantity, "quantity")
+        require_positive(quantity, "количество")
         self.dish = dish
         self.quantity = quantity
         self.unit_price = dish.price
@@ -18,11 +18,11 @@ class OrderItem:
         return self.unit_price * self.quantity
 
     def change_quantity(self, quantity: int) -> None:
-        require_positive(quantity, "quantity")
+        require_positive(quantity, "количество")
         self.quantity = quantity
 
     def increase(self, extra: int) -> None:
-        require_positive(extra, "extra quantity")
+        require_positive(extra, "дополнительное количество")
         self.quantity += extra
 
     def is_same_position(self, dish: Dish, note: str) -> bool:

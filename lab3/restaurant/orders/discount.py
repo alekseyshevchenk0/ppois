@@ -9,10 +9,12 @@ from restaurant.validation import require_non_empty, require_non_negative
 
 class Discount:
     def __init__(self, name: str, percent: Decimal, min_order_amount: Decimal = Decimal(0)) -> None:
-        require_non_empty(name, "discount name")
-        require_non_negative(min_order_amount, "minimal order amount")
+        require_non_empty(name, "название скидки")
+        require_non_negative(min_order_amount, "минимальная сумма заказа")
         if not 0 < percent <= PERCENT_BASE:
-            raise InvalidDataError(f"Процент скидки должен быть в диапазоне от 0 до 100, получено {percent}")
+            raise InvalidDataError(
+                f"Процент скидки должен быть в диапазоне от 0 до 100, получено {percent}"
+            )
         self.name = name
         self.percent = percent
         self.min_order_amount = min_order_amount

@@ -20,6 +20,7 @@ def test_all_domain_errors_share_one_base() -> None:
 def test_insufficient_stock_keeps_details() -> None:
     error = InsufficientStockError("flour", 500, 120)
     assert (error.ingredient_name, error.requested, error.available) == ("flour", 500, 120)
+    assert "Недостаточно ингредиента" in str(error)
     assert "flour" in str(error)
 
 
@@ -30,7 +31,7 @@ def test_allergen_conflict_lists_sorted_names() -> None:
 
 def test_require_non_empty() -> None:
     require_non_empty("ok", "field")
-    with pytest.raises(InvalidDataError):
+    with pytest.raises(InvalidDataError, match="Поле «field» не должно быть пустым"):
         require_non_empty("   ", "field")
 
 

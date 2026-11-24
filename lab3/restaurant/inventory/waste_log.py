@@ -17,11 +17,11 @@ class WasteLog:
     def record(self, ingredient: Ingredient, quantity: float, recorded_on: date, reason: str) -> None:
         require_positive(quantity, "количество списания")
         require_non_empty(reason, "причина списания")
-        self._entries.append({"ingredient": ingredient, "quantity": quantity, "recorded_on": recorded_on, "reason": reason})
+        self._entries.append({"ingredient": ingredient, "количество": quantity, "recorded_on": recorded_on, "reason": reason})
 
     def total_quantity(self, ingredient: Ingredient | None = None) -> float:
         return sum(
-            float(entry["quantity"])
+            float(entry["количество"])
             for entry in self._entries
             if ingredient is None or entry["ingredient"] == ingredient
         )
@@ -30,5 +30,5 @@ class WasteLog:
         totals: dict[str, float] = {}
         for entry in self._entries:
             reason = str(entry["reason"])
-            totals[reason] = totals.get(reason, 0.0) + float(entry["quantity"])
+            totals[reason] = totals.get(reason, 0.0) + float(entry["количество"])
         return totals

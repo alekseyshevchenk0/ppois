@@ -15,8 +15,8 @@ class Reservation:
     def __init__(
         self, guest: Customer, table: Table, start: datetime, guests_count: int, duration_minutes: int = DEFAULT_DURATION_MINUTES
     ) -> None:
-        require_positive(guests_count, "guests count")
-        require_positive(duration_minutes, "reservation duration")
+        require_positive(guests_count, "количество гостей")
+        require_positive(duration_minutes, "длительность бронирования")
         if not table.fits(guests_count):
             raise TableUnavailableError(table.label(), f"не хватает мест для {guests_count} гостей")
         self.guest = guest

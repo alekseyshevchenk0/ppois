@@ -34,7 +34,7 @@ ALLOWED_TRANSITIONS = {
 
 class Order:
     def __init__(self, number: int, table: Table, waiter: Waiter, guest: Customer, created_at: datetime) -> None:
-        require_positive(number, "order number")
+        require_positive(number, "номер заказа")
         self.number = number
         self.table = table
         self.waiter = waiter

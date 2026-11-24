@@ -36,7 +36,7 @@ class Waitlist:
         return len(self._entries)
 
     def join(self, guest: Customer, guests_count: int, joined_at: datetime) -> WaitlistEntry:
-        require_positive(guests_count, "guests count")
+        require_positive(guests_count, "количество гостей")
         if self._find(guest) is not None:
             raise InvalidDataError(f"Гость «{guest.name}» уже в листе ожидания")
         entry = WaitlistEntry(guest, guests_count, joined_at)
@@ -53,7 +53,7 @@ class Waitlist:
         return self.ordered().index(self._require(guest)) + 1
 
     def estimated_wait_minutes(self, guest: Customer, tables_count: int, turnover_minutes: int) -> int:
-        require_positive(tables_count, "tables count")
+        require_positive(tables_count, "количество столов")
         waves = (self.position_of(guest) - 1) // tables_count + 1
         return waves * turnover_minutes
 

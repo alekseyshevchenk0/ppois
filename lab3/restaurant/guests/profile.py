@@ -34,7 +34,7 @@ class GuestProfile:
         return self.max_dish_price is None or dish.price <= self.max_dish_price
 
     def record_order(self, dish_name: str, quantity: int = 1) -> None:
-        require_positive(quantity, "quantity")
+        require_positive(quantity, "количество")
         self._order_counts[dish_name] = self._order_counts.get(dish_name, 0) + quantity
 
     def times_ordered(self, dish_name: str) -> int:

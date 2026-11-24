@@ -15,7 +15,7 @@ class Chef(Employee):
 
     def __init__(self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date, cuisine: str) -> None:
         super().__init__(name, phone, birth_date, hourly_rate, hire_date)
-        require_non_empty(cuisine, "cuisine")
+        require_non_empty(cuisine, "кухня")
         self.cuisine = cuisine
         self._approved: set[str] = set()
 

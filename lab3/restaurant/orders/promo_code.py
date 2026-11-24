@@ -9,8 +9,8 @@ from restaurant.validation import require_non_empty, require_positive
 
 class PromoCode:
     def __init__(self, code: str, discount: Discount, valid_from: date, valid_until: date, max_uses: int) -> None:
-        require_non_empty(code, "promo code")
-        require_positive(max_uses, "max uses")
+        require_non_empty(code, "промокод")
+        require_positive(max_uses, "максимальное число использований")
         if valid_until < valid_from:
             raise InvalidDataError("Промокод не может заканчиваться раньше, чем начинается")
         self.code = code

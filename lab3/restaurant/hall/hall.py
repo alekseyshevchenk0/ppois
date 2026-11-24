@@ -7,7 +7,7 @@ from restaurant.validation import require_non_empty
 
 class Hall:
     def __init__(self, name: str, is_outdoor: bool = False) -> None:
-        require_non_empty(name, "hall name")
+        require_non_empty(name, "название зала")
         self.name = name
         self.is_outdoor = is_outdoor
         self._tables: dict[int, Table] = {}

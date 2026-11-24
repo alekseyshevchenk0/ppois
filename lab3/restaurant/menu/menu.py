@@ -15,18 +15,18 @@ from restaurant.validation import require_non_empty
 
 class Menu:
     def __init__(self, name: str) -> None:
-        require_non_empty(name, "menu name")
+        require_non_empty(name, "название меню")
         self.name = name
         self._categories: dict[str, MenuCategory] = {}
 
     def add_category(self, category: MenuCategory) -> None:
         if category.name in self._categories:
-            raise InvalidDataError(f"Category '{category.name}' already exists")
+            raise InvalidDataError(f"Категория «{category.name}» уже существует")
         self._categories[category.name] = category
 
     def category(self, name: str) -> MenuCategory:
         if name not in self._categories:
-            raise InvalidDataError(f"Category '{name}' does not exist")
+            raise InvalidDataError(f"Категория «{name}» не существует")
         return self._categories[name]
 
     def all_dishes(self) -> list[Dish]:

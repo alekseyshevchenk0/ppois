@@ -16,7 +16,7 @@ class Employee(Person):
 
     def __init__(self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date) -> None:
         super().__init__(name, phone, birth_date)
-        require_positive(hourly_rate, "hourly rate")
+        require_positive(hourly_rate, "почасовая ставка")
         self.hourly_rate = hourly_rate
         self.hire_date = hire_date
         self.is_active = True
@@ -25,7 +25,7 @@ class Employee(Person):
         return (today - self.hire_date).days // DAYS_IN_YEAR
 
     def give_raise(self, percent: Decimal) -> Decimal:
-        require_positive(percent, "raise percent")
+        require_positive(percent, "процент повышения")
         self.hourly_rate = apply_percent(self.hourly_rate, percent)
         return self.hourly_rate
 
@@ -37,4 +37,4 @@ class Employee(Person):
 
     def ensure_active(self) -> None:
         if not self.is_active:
-            raise EmployeeNotAvailableError(self.name, "the employee has been dismissed")
+            raise EmployeeNotAvailableError(self.name, "сотрудник уволен")

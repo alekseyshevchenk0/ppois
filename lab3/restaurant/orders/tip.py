@@ -9,7 +9,7 @@ from restaurant.validation import require_positive
 
 class Tip:
     def __init__(self, waiter: Waiter, amount: Decimal) -> None:
-        require_positive(amount, "tip amount")
+        require_positive(amount, "сумма чаевых")
         self.waiter = waiter
         self.amount = amount
         self.is_delivered = False

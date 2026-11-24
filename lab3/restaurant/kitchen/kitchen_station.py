@@ -10,8 +10,8 @@ from restaurant.validation import require_non_empty, require_positive
 
 class KitchenStation:
     def __init__(self, name: str, max_wait_minutes: int) -> None:
-        require_non_empty(name, "station name")
-        require_positive(max_wait_minutes, "max wait")
+        require_non_empty(name, "название станции")
+        require_positive(max_wait_minutes, "максимальное время ожидания")
         self.name = name
         self.max_wait_minutes = max_wait_minutes
         self._cooks: list[Cook] = []

@@ -17,8 +17,8 @@ DEFAULT_FRESHNESS_DAYS = 365
 
 class Dish:
     def __init__(self, name: str, price: Decimal, recipe: Recipe, description: str = "") -> None:
-        require_non_empty(name, "dish name")
-        require_positive(price, "dish price")
+        require_non_empty(name, "название блюда")
+        require_positive(price, "цена блюда")
         self.name = name
         self.price = price
         self.recipe = recipe
@@ -33,7 +33,7 @@ class Dish:
 
     def change_price_by_percent(self, percent: Decimal) -> Decimal:
         new_price = apply_percent(self.price, percent)
-        require_positive(new_price, "new dish price")
+        require_positive(new_price, "новая цена блюда")
         self.price = new_price
         return new_price
 
@@ -56,11 +56,11 @@ class Dish:
 
     def cook(self, inventory: Inventory, today: date) -> None:
         if self.is_stopped:
-            raise DishUnavailableError(self.name, "stopped by the kitchen")
+            raise DishUnavailableError(self.name, "блюдо находится в стоп-листе")
         missing = self.recipe.missing_for(inventory, today)
         if missing:
             names = ", ".join(sorted(ingredient.name for ingredient in missing))
-            raise DishUnavailableError(self.name, f"missing ingredients: {names}")
+            raise DishUnavailableError(self.name, f"не хватает ингредиентов: {names}")
         inventory.consume_all(self.recipe.requirements_for(1), today)
 
     def days_until_stock_expires(self, inventory: Inventory, today: date) -> int:

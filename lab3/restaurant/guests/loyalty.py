@@ -22,21 +22,21 @@ TIER_DISCOUNT_PERCENT = {LoyaltyTier.BRONZE: Decimal(0), LoyaltyTier.SILVER: Dec
 
 class LoyaltyCard:
     def __init__(self, number: str, issued_on: date) -> None:
-        require_non_empty(number, "card number")
+        require_non_empty(number, "номер карты")
         self.number = number
         self.issued_on = issued_on
         self.balance = 0
         self.lifetime_points = 0
 
     def earn_points(self, amount_spent: Decimal) -> int:
-        require_positive(amount_spent, "amount spent")
+        require_positive(amount_spent, "потраченная сумма")
         points = int(amount_spent * POINTS_PER_CURRENCY_UNIT)
         self.balance += points
         self.lifetime_points += points
         return points
 
     def redeem_points(self, points: int) -> None:
-        require_positive(points, "points to redeem")
+        require_positive(points, "списываемые баллы")
         if points > self.balance:
             raise InsufficientPointsError(points, self.balance)
         self.balance -= points

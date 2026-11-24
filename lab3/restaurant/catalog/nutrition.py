@@ -20,7 +20,7 @@ class NutritionInfo:
     def __post_init__(self) -> None:
         values = (self.calories, self.proteins, self.fats, self.carbs)
         if any(value < 0 for value in values):
-            raise InvalidDataError("Nutrition values must not be negative")
+            raise InvalidDataError("Значения пищевой ценности не могут быть отрицательными")
 
     def scale(self, factor: float) -> NutritionInfo:
         return NutritionInfo(self.calories * factor, self.proteins * factor, self.fats * factor, self.carbs * factor)

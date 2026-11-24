@@ -23,11 +23,11 @@ class Waiter(Employee):
         return language.lower() in self.languages
 
     def receive_tip(self, amount: Decimal) -> None:
-        require_positive(amount, "tip")
+        require_positive(amount, "чаевые")
         self.tips_total += amount
 
     def serve_guests(self, count: int) -> None:
-        require_positive(count, "guest count")
+        require_positive(count, "количество гостей")
         self.ensure_active()
         self.guests_served += count
 

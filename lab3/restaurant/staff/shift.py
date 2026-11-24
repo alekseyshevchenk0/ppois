@@ -25,7 +25,7 @@ class Shift:
 
     def __init__(self, employee: Employee, day: date, start: time, end: time) -> None:
         if end <= start:
-            raise InvalidDataError("Shift must end after it starts")
+            raise InvalidDataError("Смена должна заканчиваться позже своего начала")
         self.employee = employee
         self.day = day
         self.start = start
