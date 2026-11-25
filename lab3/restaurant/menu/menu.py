@@ -19,6 +19,10 @@ class Menu:
         self.name = name
         self._categories: dict[str, MenuCategory] = {}
 
+    @property
+    def categories(self) -> tuple[MenuCategory, ...]:
+        return tuple(self._categories.values())
+
     def add_category(self, category: MenuCategory) -> None:
         if category.name in self._categories:
             raise InvalidDataError(f"Категория «{category.name}» уже существует")
@@ -28,6 +32,15 @@ class Menu:
         if name not in self._categories:
             raise InvalidDataError(f"Категория «{name}» не существует")
         return self._categories[name]
+
+    def add_dish(self, category_name: str, dish: Dish) -> None:
+        self.category(category_name).add_dish(dish)
+
+    def remove_dish(self, name: str) -> Dish:
+        for category in self._categories.values():
+            if category.find_dish(name) is not None:
+                return category.remove_dish(name)
+        raise InvalidDataError(f"Блюдо «{name}» не найдено")
 
     def all_dishes(self) -> list[Dish]:
         return [dish for category in self._categories.values() for dish in category.dishes]

@@ -18,8 +18,10 @@ from restaurant.hall.reservation_book import ReservationBook
 from restaurant.hall.table import Table
 from restaurant.inventory.inventory import Inventory
 from restaurant.kitchen.kitchen import Kitchen
+from restaurant.menu.category import MenuCategory
 from restaurant.menu.dish import Dish
 from restaurant.menu.menu import Menu
+from restaurant.menu.recipe import Recipe
 from restaurant.orders.bill import Bill
 from restaurant.orders.order import Order, OrderStatus
 from restaurant.orders.payment import Payment, PaymentMethod
@@ -90,7 +92,8 @@ class RestaurantApp:
             "6. Получить рекомендации\n7. Показать динамические цены\n"
             "8. Управление приготовлением и подачей заказа\n9. Оплатить заказ\n10. Создать бронирование\n"
             "11. Отзывы о блюдах\n12. Отчёт о продажах\n13. Управление доставкой\n"
-            "14. Показать стоп-лист\n15. Управление бронированиями\n0. Выход"
+            "14. Показать стоп-лист\n15. Управление бронированиями\n"
+            "16. Добавить блюдо\n17. Изменить цену блюда\n18. Удалить блюдо\n0. Выход"
         )
 
     def _dispatch(self, choice: int) -> None:
@@ -100,6 +103,7 @@ class RestaurantApp:
             7: self._show_dynamic_prices, 8: self._advance_order, 9: self._pay_order,
             10: self._create_reservation, 11: self._manage_reviews, 12: self._show_sales_report,
             13: self._manage_delivery, 14: self._show_stop_list, 15: self._manage_reservations,
+            16: self._add_dish, 17: self._edit_dish, 18: self._delete_dish,
         }
         action = actions.get(choice)
         if action is None:
@@ -109,6 +113,136 @@ class RestaurantApp:
             action()
         except (RestaurantError, ValueError) as error:
             self.output_fn(f"Ошибка: {error}")
+
+    def _add_dish(self) -> None:
+        details = self._read_dish_details()
+        if details is None:
+            return
+        name, category_name, price, minutes = details
+        requirements = self._read_recipe_requirements()
+        if not requirements:
+            self.output_fn("У блюда должен быть хотя бы один ингредиент.")
+            return
+        step = self._read_recipe_step()
+        if step is None:
+            return
+        self._save_new_dish(name, category_name, price, minutes, requirements, step)
+
+    def _read_dish_details(self) -> tuple[str, str, Decimal, int] | None:
+        name = self.input_fn("Название нового блюда: ").strip()
+        if not name or self.menu.find_dish(name) is not None:
+            self.output_fn("Название пустое или такое блюдо уже существует.")
+            return None
+        category_name = self.input_fn("Категория блюда: ").strip()
+        if not category_name:
+            self.output_fn("Название категории не должно быть пустым.")
+            return None
+        price = self._read_money("Цена блюда (руб.): ")
+        minutes = self._read_int("Время приготовления (мин.): ")
+        if price <= 0 or minutes <= 0:
+            self.output_fn("Цена и время приготовления должны быть положительными.")
+            return None
+        return name, category_name, price, minutes
+
+    def _read_recipe_step(self) -> str | None:
+        step = self.input_fn("Шаг приготовления: ").strip()
+        if not step:
+            self.output_fn("Шаг приготовления не должен быть пустым.")
+            return None
+        return step
+
+    def _save_new_dish(
+        self, name: str, category_name: str, price: Decimal, minutes: int,
+        requirements: dict[Ingredient, float], step: str,
+    ) -> None:
+        category = self._get_or_create_category(category_name)
+        recipe = Recipe([step], minutes, station="универсальный цех")
+        for ingredient, amount in requirements.items():
+            recipe.add_requirement(ingredient, amount)
+        self.menu.add_dish(category.name, Dish(name, price, recipe))
+        self.output_fn(f"Блюдо «{name}» добавлено в категорию «{category.name}».")
+
+    def _get_or_create_category(self, name: str) -> MenuCategory:
+        category = next((item for item in self.menu.categories if item.name == name), None)
+        if category is None:
+            category = MenuCategory(name)
+            self.menu.add_category(category)
+        return category
+
+    def _read_recipe_requirements(self) -> dict[Ingredient, float]:
+        ingredients = sorted(self.inventory.stock_report(self.today), key=lambda item: item.name)
+        if not ingredients:
+            self.output_fn("На складе нет ингредиентов. Добавить блюдо невозможно.")
+            return {}
+        self._show_stock_ingredients(ingredients)
+        return self._collect_recipe_requirements(ingredients)
+
+    def _show_stock_ingredients(self, ingredients: list[Ingredient]) -> None:
+        self.output_fn("Ингредиенты со склада:")
+        for index, ingredient in enumerate(ingredients, 1):
+            quantity = self.inventory.total_of(ingredient, self.today)
+            self.output_fn(f"{index}. {ingredient.name} — {quantity:g} {ingredient.unit}")
+
+    def _collect_recipe_requirements(
+        self, ingredients: list[Ingredient],
+    ) -> dict[Ingredient, float]:
+        requirements = {}
+        while True:
+            choice = self._read_int("Номер ингредиента (0 — завершить): ")
+            if choice == 0:
+                return requirements
+            self._add_selected_ingredient(choice, ingredients, requirements)
+
+    def _add_selected_ingredient(
+        self, choice: int, ingredients: list[Ingredient], requirements: dict[Ingredient, float],
+    ) -> None:
+        if not 1 <= choice <= len(ingredients):
+            self.output_fn("Ингредиента с таким номером нет.")
+            return
+        amount = self._read_positive_float("Количество на одну порцию: ")
+        if amount > 0:
+            requirements[ingredients[choice - 1]] = amount
+
+    def _edit_dish(self) -> None:
+        dishes = self.menu.all_dishes()
+        self._print_dishes(dishes)
+        if not dishes:
+            return
+        choice = self._read_int("Номер блюда для изменения цены: ")
+        if not 1 <= choice <= len(dishes):
+            self.output_fn("Блюда с таким номером нет.")
+            return
+        dish = dishes[choice - 1]
+        new_price = self._read_money("Новая цена (руб.): ")
+        if new_price <= 0:
+            self.output_fn("Цена должна быть положительной.")
+            return
+        dish.price = new_price
+        self.output_fn(f"Цена блюда «{dish.name}» изменена на {new_price:.2f} руб.")
+
+    def _delete_dish(self) -> None:
+        dishes = self.menu.all_dishes()
+        self._print_dishes(dishes)
+        if not dishes:
+            return
+        choice = self._read_int("Номер блюда для удаления: ")
+        if not 1 <= choice <= len(dishes):
+            self.output_fn("Блюда с таким номером нет.")
+            return
+        dish = dishes[choice - 1]
+        self.menu.remove_dish(dish.name)
+        self.output_fn(f"Блюдо «{dish.name}» удалено из меню.")
+
+    def _read_positive_float(self, prompt: str) -> float:
+        try:
+            value = float(self.input_fn(prompt).replace(",", "."))
+        except ValueError:
+            self.output_fn("Нужно ввести число.")
+            return 0.0
+        if value <= 0:
+            self.output_fn("Количество должно быть положительным.")
+            return 0.0
+        return value
 
     def _show_dishes(self) -> None:
         self._print_dishes(self.menu.all_dishes())

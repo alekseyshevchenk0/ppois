@@ -324,3 +324,28 @@ def test_overlapping_reservation_is_rejected():
     app.run()
     assert len(app.reservations) == 1
     assert any("Стол №1 уже занят" in message for message in console.messages)
+
+
+def test_add_dish_from_existing_stock_ingredients():
+    console = ConsoleStub([
+        "16", "Новый салат", "Салаты", "9.50", "10", "1", "100",
+        "0", "Смешать ингредиенты", "1", "0",
+    ])
+    app = build_app(console)
+    app.run()
+    dish = app.menu.find_dish("Новый салат")
+    assert dish is not None
+    assert dish.price == Decimal("9.50")
+    assert dish.recipe.cooking_minutes == 10
+    assert any("добавлено" in message for message in console.messages)
+
+
+def test_edit_and_delete_dish_from_console():
+    console = ConsoleStub(["17", "1", "7.25", "18", "1", "0"])
+    app = build_app(console)
+    dish = app.menu.find_dish("Салат")
+    app.run()
+    assert dish is not None
+    assert dish.price == Decimal("7.25")
+    assert app.menu.find_dish("Салат") is None
+    assert any("удалено из меню" in message for message in console.messages)
