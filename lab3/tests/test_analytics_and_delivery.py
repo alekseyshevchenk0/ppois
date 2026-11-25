@@ -63,30 +63,37 @@ def test_sales_report_rejects_invalid_period():
         SalesReport([], TODAY + timedelta(days=1), TODAY)
 
 
-def test_menu_recommender_respects_guest_profile(adult_guest, pancakes, salad):
+def test_menu_recommender_sorts_by_price(pancakes, salad):
     menu = Menu("Основное меню")
     category = MenuCategory("Основные блюда")
     category.add_dish(pancakes)
     category.add_dish(salad)
     menu.add_category(category)
-    adult_guest.profile.record_order(salad.name, 3)
+
     recommender = MenuRecommender(menu)
-    assert recommender.recommend(adult_guest) == [salad, pancakes]
+
+    expected = sorted(
+        [pancakes, salad],
+        key=lambda dish: (dish.price, dish.name),
+    )
+    assert recommender.recommend() == expected
 
 
-def test_menu_recommender_filters_allergens(gold_guest, pancakes, salad):
+def test_menu_recommender_filters_stopped_dishes(pancakes, salad):
     menu = Menu("Основное меню")
     category = MenuCategory("Основные блюда")
     category.add_dish(pancakes)
     category.add_dish(salad)
     menu.add_category(category)
-    gold_guest.profile.add_allergen(next(iter(pancakes.allergens())))
-    assert MenuRecommender(menu).recommend(gold_guest) == [salad]
+
+    pancakes.is_stopped = True
+
+    assert MenuRecommender(menu).recommend() == [salad]
 
 
-def test_menu_recommender_validates_limit(adult_guest):
+def test_menu_recommender_validates_limit():
     with pytest.raises(InvalidDataError):
-        MenuRecommender(Menu("Меню")).recommend(adult_guest, 0)
+        MenuRecommender(Menu("Меню")).recommend(0)
 
 
 def test_dynamic_pricer_happy_hour_and_peak(pancakes):

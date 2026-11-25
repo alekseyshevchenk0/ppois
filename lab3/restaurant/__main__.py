@@ -157,10 +157,10 @@ def _create_demo_menu(today: date, inventory_path: Path | None = None) -> tuple[
 
 
 def _create_demo_staff() -> tuple[Waiter, Cashier, Courier, Cook]:
-    waiter = Waiter("Анна", "+70000000001", date(1995, 5, 12), Decimal("12.00"), date(2020, 1, 10))
-    cashier = Cashier("Мария", "+70000000002", date(1992, 3, 8), Decimal("11.00"), date(2019, 6, 1), 1)
-    courier = Courier("Иван", "+70000000003", date(1990, 7, 14), Decimal("10.00"), date(2022, 2, 1), "велосипед")
-    cook = Cook("Сергей", "+70000000004", date(1993, 4, 2), Decimal("13.00"), date(2021, 3, 1), "универсальный цех")
+    waiter = Waiter("Анна", "+375330000011", date(1995, 5, 12), Decimal("12.00"), date(2020, 1, 10))
+    cashier = Cashier("Мария", "+375290000021", date(1992, 3, 8), Decimal("11.00"), date(2019, 6, 1), 1)
+    courier = Courier("Иван", "+375330000031", date(1990, 7, 14), Decimal("10.00"), date(2022, 2, 1), "велосипед")
+    cook = Cook("Сергей", "+375330000004", date(1993, 4, 2), Decimal("13.00"), date(2021, 3, 1), "универсальный цех")
     return waiter, cashier, courier, cook
 
 

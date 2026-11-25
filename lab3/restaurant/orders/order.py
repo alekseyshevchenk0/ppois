@@ -47,16 +47,33 @@ class Order:
     def items(self) -> list[OrderItem]:
         return list(self._items)
 
-    def add_item(self, dish: Dish, quantity: int = 1, note: str = "") -> OrderItem:
+    def add_item(
+        self,
+        dish: Dish,
+        quantity: int = 1,
+        note: str = "",
+        unit_price: Decimal | None = None,
+    ) -> OrderItem:
         self._require_new("добавить блюдо")
         if dish.is_stopped:
             raise DishUnavailableError(dish.name, "блюдо в стоп-листе")
         dish.ensure_safe_for(self.guest.profile.forbidden_allergens)
-        existing = next((item for item in self._items if item.is_same_position(dish, note)), None)
+
+        price = dish.price if unit_price is None else unit_price
+
+        existing = next(
+            (
+                item
+                for item in self._items
+                if item.is_same_position(dish, note, price)
+            ),
+            None,
+        )
         if existing is not None:
             existing.increase(quantity)
             return existing
-        item = OrderItem(dish, quantity, note)
+
+        item = OrderItem(dish, quantity, note, price)
         self._items.append(item)
         return item
 

@@ -7,11 +7,20 @@ from restaurant.validation import require_positive
 
 
 class OrderItem:
-    def __init__(self, dish: Dish, quantity: int, note: str = "") -> None:
+    def __init__(
+        self,
+        dish: Dish,
+        quantity: int,
+        note: str = "",
+        unit_price: Decimal | None = None,
+    ) -> None:
         require_positive(quantity, "количество")
+        price = dish.price if unit_price is None else unit_price
+        require_positive(price, "цена блюда")
+
         self.dish = dish
         self.quantity = quantity
-        self.unit_price = dish.price
+        self.unit_price = price
         self.note = note
 
     def total(self) -> Decimal:
@@ -25,8 +34,17 @@ class OrderItem:
         require_positive(extra, "дополнительное количество")
         self.quantity += extra
 
-    def is_same_position(self, dish: Dish, note: str) -> bool:
-        return self.dish is dish and self.note == note
+    def is_same_position(
+        self,
+        dish: Dish,
+        note: str,
+        unit_price: Decimal,
+    ) -> bool:
+        return (
+            self.dish is dish
+            and self.note == note
+            and self.unit_price == unit_price
+        )
 
     def cooking_minutes(self) -> int:
         return self.dish.recipe.cooking_time_for(self.quantity)

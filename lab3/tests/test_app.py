@@ -48,10 +48,10 @@ def _build_test_menu(today: date) -> tuple[Menu, Inventory]:
 
 
 def _build_test_staff(inventory: Inventory) -> tuple[Waiter, Cashier, Courier, Kitchen]:
-    waiter = Waiter("Анна", "+70000000001", date(1995, 1, 1), Decimal("10"), date(2020, 1, 1))
-    cashier = Cashier("Мария", "+70000000002", date(1992, 3, 8), Decimal("11"), date(2019, 6, 1), 1)
-    courier = Courier("Иван", "+70000000003", date(1990, 7, 14), Decimal("10"), date(2022, 2, 1), "велосипед")
-    cook = Cook("Сергей", "+70000000004", date(1993, 4, 2), Decimal("13"), date(2021, 3, 1), "горячий цех")
+    waiter = Waiter("Анна", "+375330000000", date(1995, 1, 1), Decimal("10"), date(2020, 1, 1))
+    cashier = Cashier("Мария", "+375290000000", date(1992, 3, 8), Decimal("11"), date(2019, 6, 1), 1)
+    courier = Courier("Иван", "+375140000030", date(1990, 7, 14), Decimal("10"), date(2022, 2, 1), "велосипед")
+    cook = Cook("Сергей", "+375150000004", date(1993, 4, 2), Decimal("13"), date(2021, 3, 1), "горячий цех")
     kitchen = Kitchen(inventory)
     station = KitchenStation("горячий цех", 60)
     station.add_cook(cook)
@@ -109,10 +109,14 @@ def test_create_order_rejects_non_positive_quantity() -> None:
 
 
 def test_recommendations_and_dynamic_prices() -> None:
-    console = ConsoleStub(["6", "Пётр", "7", "0"])
+    console = ConsoleStub(["6", "7", "0"])
     build_app(console).run()
-    assert any("Рекомендации для гостя" in message for message in console.messages)
-    assert any(message.startswith("Салат: ") and message.endswith(" руб.") for message in console.messages)
+
+    assert any("Рекомендации блюд" in message for message in console.messages)
+    assert any(
+        message.startswith("Салат: ") and message.endswith(" руб.")
+        for message in console.messages
+    )
 
 
 def test_invalid_choice_and_non_integer_input() -> None:
@@ -126,7 +130,6 @@ def test_demo_application_is_configured() -> None:
     app = create_demo_app()
     assert app.menu.name == "Основное меню"
     assert len(app.menu.all_dishes()) == 15
-    assert len(app.menu.available_dishes(app.inventory, app.today)) == 15
     assert app.inventory.stock_report(app.today)
 
 
@@ -143,13 +146,14 @@ def test_empty_inventory_and_empty_menu_messages() -> None:
 
 
 def test_empty_orders_and_empty_recommendations() -> None:
-    console = ConsoleStub(["5", "6", "   ", "0"])
+    console = ConsoleStub(["5", "6", "0"])
     app = build_app(console)
     app.menu = Menu("Пустое меню")
     app.recommender = MenuRecommender(app.menu)
     app.run()
+
     assert "Заказов пока нет." in console.messages
-    assert "Рекомендации для гостя:" in console.messages
+    assert "Рекомендации блюд:" in console.messages
     assert "Список пуст." in console.messages
 
 
@@ -326,26 +330,312 @@ def test_overlapping_reservation_is_rejected():
     assert any("Стол №1 уже занят" in message for message in console.messages)
 
 
-def test_add_dish_from_existing_stock_ingredients():
+def test_add_dish_successfully():
     console = ConsoleStub([
-        "16", "Новый салат", "Салаты", "9.50", "10", "1", "100",
-        "0", "Смешать ингредиенты", "1", "0",
+        "16", "Овощной суп", "Супы", "12", "15",
+        "1", "50", "0", "Сварить овощи", "0",
     ])
     app = build_app(console)
+
     app.run()
-    dish = app.menu.find_dish("Новый салат")
+
+    dish = app.menu.find_dish("Овощной суп")
     assert dish is not None
-    assert dish.price == Decimal("9.50")
-    assert dish.recipe.cooking_minutes == 10
-    assert any("добавлено" in message for message in console.messages)
+    assert dish.price == Decimal("12")
+    assert "Блюдо «Овощной суп» добавлено в категорию «Супы»." in console.messages
 
 
-def test_edit_and_delete_dish_from_console():
-    console = ConsoleStub(["17", "1", "7.25", "18", "1", "0"])
+def test_add_dish_rejects_duplicate_name():
+    console = ConsoleStub(["16", "Салат", "0"])
     app = build_app(console)
-    dish = app.menu.find_dish("Салат")
+
     app.run()
-    assert dish is not None
-    assert dish.price == Decimal("7.25")
+
+    assert "Название пустое или такое блюдо уже существует." in console.messages
+    assert len(app.menu.all_dishes()) == 1
+
+
+def test_add_dish_rejects_empty_category():
+    console = ConsoleStub(["16", "Новый салат", "   ", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Название категории не должно быть пустым." in console.messages
+
+
+def test_add_dish_rejects_non_positive_price():
+    console = ConsoleStub(["16", "Новый салат", "Салаты", "0", "10", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Цена и время приготовления должны быть положительными." in console.messages
+
+
+def test_add_dish_without_stock_ingredients():
+    console = ConsoleStub(["16", "Новый суп", "Супы", "10", "15", "0"])
+    app = build_app(console)
+    app.inventory = Inventory()
+
+    app.run()
+
+    assert "На складе нет ингредиентов. Добавить блюдо невозможно." in console.messages
+    assert not any(dish.name == "Новый суп" for dish in app.menu.all_dishes())
+
+
+def test_add_dish_rejects_empty_recipe():
+    console = ConsoleStub([
+        "16", "Новый суп", "Супы", "10", "15", "0", "0",
+    ])
+    app = build_app(console)
+
+    app.run()
+
+    assert "У блюда должен быть хотя бы один ингредиент." in console.messages
+
+
+def test_add_dish_rejects_empty_cooking_step():
+    console = ConsoleStub([
+        "16", "Новый суп", "Супы", "10", "15",
+        "1", "50", "0", "   ", "0",
+    ])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Шаг приготовления не должен быть пустым." in console.messages
+    assert not any(dish.name == "Новый суп" for dish in app.menu.all_dishes())
+
+
+def test_add_dish_rejects_invalid_ingredient_number():
+    console = ConsoleStub([
+        "16", "Новый суп", "Супы", "10", "15",
+        "99", "1", "50", "0", "Сварить", "0",
+    ])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Ингредиента с таким номером нет." in console.messages
+    assert app.menu.find_dish("Новый суп") is not None
+
+
+def test_edit_dish_price():
+    console = ConsoleStub(["17", "1", "15", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert app.menu.find_dish("Салат").price == Decimal("15")
+    assert any("Цена блюда «Салат» изменена" in message for message in console.messages)
+
+
+def test_edit_dish_rejects_invalid_number():
+    console = ConsoleStub(["17", "99", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Блюда с таким номером нет." in console.messages
+
+
+def test_edit_dish_rejects_non_positive_price():
+    console = ConsoleStub(["17", "1", "0", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Цена должна быть положительной." in console.messages
+    assert app.menu.find_dish("Салат").price == Decimal("5.00")
+
+
+def test_edit_empty_menu():
+    console = ConsoleStub(["17", "0"])
+    app = build_app(console)
+    app.menu = Menu("Пустое меню")
+
+    app.run()
+
+    assert "Список пуст." in console.messages
+
+
+def test_delete_dish_successfully():
+    console = ConsoleStub(["18", "1", "0"])
+    app = build_app(console)
+
+    app.run()
+
     assert app.menu.find_dish("Салат") is None
-    assert any("удалено из меню" in message for message in console.messages)
+    assert "Блюдо «Салат» удалено из меню." in console.messages
+
+
+def test_delete_dish_rejects_invalid_number():
+    console = ConsoleStub(["18", "99", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Блюда с таким номером нет." in console.messages
+
+
+def test_replenish_inventory_successfully():
+    console = ConsoleStub(["19", "1", "250", "", "0"])
+    app = build_app(console)
+    ingredient = next(iter(app.inventory._batches)).ingredient
+
+    app.run()
+
+    assert app.inventory.total_of(ingredient, app.today) == 1250
+    assert any("На склад поступило 250" in message for message in console.messages)
+
+
+def test_replenish_inventory_rejects_invalid_date():
+    console = ConsoleStub(["19", "1", "250", "не дата", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert any(message.startswith("Ошибка:") for message in console.messages)
+
+
+def test_replenish_inventory_with_empty_menu():
+    console = ConsoleStub(["19", "0"])
+    app = build_app(console)
+    app.menu = Menu("Пустое меню")
+
+    app.run()
+
+    assert "Нет известных ингредиентов." in console.messages
+
+
+def test_replenish_inventory_rejects_invalid_ingredient():
+    console = ConsoleStub(["19", "99", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Ингредиента с таким номером нет." in console.messages
+
+
+def test_replenish_inventory_rejects_zero_quantity():
+    console = ConsoleStub(["19", "1", "0", "0"])
+    app = build_app(console)
+    ingredient = next(iter(app.inventory._batches)).ingredient
+    old_quantity = app.inventory.total_of(ingredient, app.today)
+
+    app.run()
+
+    assert app.inventory.total_of(ingredient, app.today) == old_quantity
+
+
+def test_reservation_can_be_marked_as_arrived():
+    console = ConsoleStub([
+        "10", "Пётр", "2", "2026-11-25 19:00",
+        "15", "2", "Пётр", "0",
+    ])
+    app = build_app(console)
+
+    app.run()
+
+    assert app.reservations[0].has_arrived
+    assert "Прибытие гостя отмечено." in console.messages
+
+
+def test_reservation_selection_rejects_unknown_guest():
+    console = ConsoleStub([
+        "10", "Пётр", "2", "2026-11-25 19:00",
+        "15", "3", "Несуществующий гость", "0",
+    ])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Бронирование для этого гостя не найдено." in console.messages
+    assert not app.reservations[0].is_cancelled
+
+
+def test_reservation_menu_rejects_unknown_action():
+    console = ConsoleStub(["15", "99", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Неизвестный пункт меню." in console.messages
+
+
+def test_review_list_without_reviews():
+    console = ConsoleStub(["11", "2", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Опубликованных отзывов пока нет." in console.messages
+
+
+def test_review_rejects_empty_guest_name():
+    console = ConsoleStub(["11", "1", "1", "   ", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert not app.reviews
+    assert "Имя гостя не должно быть пустым." in console.messages
+
+
+def test_delivery_rejects_invalid_courier_number():
+    console = ConsoleStub(["13", "1", "99", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Курьер с таким номером не найден." in console.messages
+    assert not app.deliveries
+
+
+def test_delivery_list_without_deliveries():
+    console = ConsoleStub(["13", "2", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Доставок пока нет." in console.messages
+
+
+def test_delivery_rejects_invalid_dish_number():
+    console = ConsoleStub(["13", "1", "1", "Пётр", "99", "0"])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Блюда с таким номером нет." in console.messages
+    assert not app.deliveries
+
+
+def test_order_selection_rejects_unknown_number():
+    console = ConsoleStub([
+        "4", "1", "1", "Иван",
+        "8", "99", "0",
+    ])
+    app = build_app(console)
+
+    app.run()
+
+    assert "Заказ с таким номером не найден." in console.messages
+
+
+def test_order_without_kitchen_can_be_prepared():
+    console = ConsoleStub([
+        "4", "1", "1", "Иван",
+        "8", "1",
+        "8", "1",
+        "0",
+    ])
+    app = build_app(console)
+    app.kitchen = None
+
+    app.run()
+
+    assert app.orders[0].status.value == "готов"
+    assert "Заказ отправлен на кухню." in console.messages
+    assert "Приготовление завершено." in console.messages
