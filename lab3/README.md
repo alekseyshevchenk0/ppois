@@ -1,6 +1,6 @@
 # Restaurant Management System — Python OOP Project
 
-A Python object-oriented project that models the daily work of a restaurant. It includes a menu and recipes, ingredients and stock batches, customers and loyalty cards, employees and shifts, tables and reservations, orders and kitchen tickets, bills and payments, suppliers and purchase orders, reviews, delivery, dynamic pricing and sales analytics.
+A Python object-oriented project that models the daily work of a restaurant. It includes a menu and recipes, ingredients and stock batches, customers and dietary preferences, employees and shifts, tables and reservations, orders and kitchen tickets, bills and payments, suppliers and purchase orders, reviews, delivery, dynamic pricing and sales analytics.
 
 The project is organised as a Python package (`restaurant`) with a separate console application entry point. It uses in-memory objects for the restaurant domain and JSON storage for inventory batches. No database or external service is required.
 
@@ -8,19 +8,19 @@ The project is organised as a Python package (`restaurant`) with a separate cons
 
 ## Project metrics
 
-The counts below are based on the current source code.
+The counts below reflect the project after removing the loyalty-card subsystem.
 
 | Metric | Count |
 |---|---:|
-| Domain and application classes | **58** |
-| Custom exception classes | **15** |
-| All classes, including custom exceptions | **73** |
-| Fields in domain and application classes | **208** |
-| Public behaviour methods | **261** |
-| Class associations | **111** |
+| Domain and application classes | **56** |
+| Custom exception classes | **14** |
+| All classes, including custom exceptions | **70** |
+| Fields in domain and application classes | **203** |
+| Public behaviour methods | **252** |
+| Class associations | **110** |
 
 Counting rules:
-- The 58 domain and application classes include the console application, model classes and enums, but exclude the 15 custom exception classes.
+- The 56 domain and application classes include the console application, model classes and enums, but exclude the 14 custom exception classes.
 - Fields are distinct instance attributes stored on class instances.
 - Behaviour methods are public methods, excluding constructors, private methods and property accessors.
 - An association is a distinct class-to-class relationship represented by a typed field or a typed method parameter. A class pair is counted once even if it appears in several methods.
@@ -33,11 +33,10 @@ Counting rules:
 - Track ingredient quantities in separate stock batches, including receipt dates and expiry dates.
 - Consume stock using the earliest-expiry-first approach and identify expired or soon-to-expire batches.
 - Persist inventory batches between launches using a JSON file in the current user's application-data directory.
-- Create and manage customer profiles, dietary preferences, allergens and loyalty cards.
-- Calculate loyalty points, customer discounts and loyalty tiers.
+- Create and manage customer profiles, dietary preferences and allergens.
 - Create restaurant orders, add and remove order items, and track order statuses.
 - Send orders to kitchen stations, estimate preparation time and monitor delayed kitchen tickets.
-- Calculate bills, apply discounts, promo codes and loyalty rewards, add tips and process payments.
+- Calculate bills, apply discounts and promo codes, add tips and process payments by cash or bank card.
 - Manage tables, halls, reservations, no-shows, waiting lists and seating recommendations.
 - Manage employees, roles, shifts, work schedules, payroll, overtime and night bonuses.
 - Work with suppliers, ingredient price lists, purchase orders and stock replenishment.
@@ -79,14 +78,12 @@ Counting rules:
 | `DeliveryOrder` | `number`, `customer`, `address`, `items`, `courier`, `status`, `delivery_fee`, `created_at` | `add_item`, `assign_courier`, `pick_up`, `deliver`, `cancel`, `subtotal`, `total` — Manages a delivery lifecycle |
 | `DeliveryStatus` | Delivery status values | Enum for delivery stages |
 
-### `guests` — Customers and loyalty
+### `guests` — Customers and dietary preferences
 
 | Class | Main data | Key behaviours |
 |---|---|---|
-| `Customer` | `email`, `profile`, `loyalty_card`, `visits_count` | `register_visit`, `is_regular`, `attach_card`, `can_eat`, `discount_percent`, `earn_loyalty_points` — Manages customer visits, preferences and rewards |
+| `Customer` | `email`, `profile`, `visits_count` | `register_visit`, `is_regular`, `can_eat` — Manages customer visits and dietary preferences |
 | `GuestProfile` | `forbidden_allergens`, `is_vegetarian`, `max_dish_price`, order history | `add_allergen`, `remove_allergen`, `accepts`, `record_order`, `times_ordered`, `favorites` — Stores dietary preferences and order history |
-| `LoyaltyCard` | `number`, `balance`, `lifetime_points`, `issued_on` | `earn_points`, `redeem_points`, `tier`, `discount_percent`, `points_to_next_tier` — Manages loyalty points and discounts |
-| `LoyaltyTier` | Loyalty tier values | Enum for customer loyalty levels |
 
 ### `hall` — Halls, tables and reservations
 
@@ -133,13 +130,13 @@ Counting rules:
 
 | Class | Main data | Key behaviours |
 |---|---|---|
-| `Bill` | `order`, discounts, `tip`, settlement state | `apply_discount`, `apply_promo`, `apply_loyalty`, `discount_percent_total`, `discount_amount`, `total_due`, `add_tip`, `total_with_tip`, `settle`, `receipt_lines` — Calculates and settles a bill |
+| `Bill` | `order`, discounts, `tip`, settlement state | `apply_discount`, `apply_promo`, `discount_percent_total`, `discount_amount`, `total_due`, `add_tip`, `total_with_tip`, `settle`, `receipt_lines` — Calculates and settles a bill |
 | `Discount` | `name`, `percent`, `min_order_amount` | `applies_to`, `amount_off` — Checks and calculates a discount |
 | `Order` | `number`, `guest`, `table`, `waiter`, `items`, `status`, `created_at` | `add_item`, `remove_item`, `subtotal`, `validate_for_kitchen`, `send_to_kitchen`, `mark_ready`, `mark_served`, `mark_paid`, `cancel`, `is_closed` — Manages the order lifecycle |
 | `OrderItem` | `dish`, `quantity`, `unit_price`, `note` | `total`, `change_quantity`, `increase`, `is_same_position`, `cooking_minutes` — Represents and calculates an order line |
 | `OrderStatus` | Order status values | Enum for order lifecycle stages |
 | `Payment` | `bill`, `method`, `tendered`, `change`, `paid_at`, completion state | `process` — Processes a payment |
-| `PaymentMethod` | Payment method values | Enum for supported payment methods |
+| `PaymentMethod` | Payment method values | Enum for cash and bank-card payments |
 | `PromoCode` | `code`, `discount`, validity dates, usage limits | `is_valid_on`, `remaining_uses`, `redeem` — Validates and redeems promo codes |
 | `Tip` | `amount`, `waiter`, delivery state | `from_percent`, `percent_of`, `deliver` — Calculates and records a tip |
 
@@ -170,7 +167,7 @@ Counting rules:
 
 ## Custom exceptions
 
-The project defines **15 custom exception classes**. They provide domain-specific error messages in Russian.
+The project defines **14 custom exception classes**. They provide domain-specific error messages in Russian.
 
 | Exception | Purpose |
 |---|---|
@@ -180,7 +177,6 @@ The project defines **15 custom exception classes**. They provide domain-specifi
 | `DishUnavailableError` | A dish cannot currently be ordered or prepared |
 | `AllergenConflictError` | A dish contains an allergen forbidden by the guest profile |
 | `EmployeeNotAvailableError` | An employee is unavailable for the requested operation |
-| `InsufficientPointsError` | Not enough loyalty points for redemption |
 | `UnderageGuestError` | A guest is under the required age for an alcoholic drink |
 | `TableUnavailableError` | A table or another hall resource is unavailable |
 | `ReservationConflictError` | A table already has a reservation for the requested time |
@@ -200,7 +196,7 @@ Run the application from the `lab3` directory:
 python -m restaurant
 ```
 
-The interface and user-facing messages are in Russian. The console menu provides the following actions:
+The interface and user-facing messages are in Russian. Payments are supported in cash or by bank card. The console menu provides the following actions:
 
 1. Show the restaurant menu.
 2. Show currently available dishes.
@@ -315,7 +311,6 @@ lab3/
 │   │   └── delivery_order.py
 │   ├── guests/
 │   │   ├── customer.py
-│   │   ├── loyalty.py
 │   │   └── profile.py
 │   ├── hall/
 │   │   ├── banquet.py
@@ -366,7 +361,6 @@ lab3/
 │   └── test_*.py
 ├── .flake8
 ├── pytest.ini
-├── README.md
 └── requirements-dev.txt
 ```
 
