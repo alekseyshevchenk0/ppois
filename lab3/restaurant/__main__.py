@@ -1,5 +1,8 @@
+import os
+import sys
 from datetime import date
 from decimal import Decimal
+from pathlib import Path
 
 from restaurant.app import RestaurantApp
 from restaurant.catalog.allergen import Allergen
@@ -8,6 +11,7 @@ from restaurant.catalog.nutrition import NutritionInfo
 from restaurant.delivery.courier import Courier
 from restaurant.hall.table import Table
 from restaurant.inventory.inventory import Inventory
+from restaurant.inventory.storage import InventoryStorage
 from restaurant.kitchen.kitchen import Kitchen
 from restaurant.kitchen.kitchen_station import KitchenStation
 from restaurant.menu.category import MenuCategory
@@ -19,7 +23,7 @@ from restaurant.staff.cook import Cook
 from restaurant.staff.waiter import Waiter
 
 
-def _create_demo_menu(today: date) -> tuple[Menu, Inventory]:
+def _create_demo_menu(today: date, inventory_path: Path | None = None) -> tuple[Menu, Inventory]:
     ingredient_data = {
         "Помидоры": (0.18, 0.009, 0.002, 0.039, 5, frozenset(), False),
         "Огурцы": (0.15, 0.007, 0.001, 0.036, 5, frozenset(), False),
@@ -58,8 +62,11 @@ def _create_demo_menu(today: date) -> tuple[Menu, Inventory]:
         for name, values in ingredient_data.items()
     }
     inventory = Inventory()
-    for ingredient in ingredients.values():
-        inventory.receive(ingredient, 5000, today)
+    storage = InventoryStorage(inventory_path) if inventory_path is not None else None
+    loaded = storage.load(inventory, ingredients) if storage is not None else False
+    if not loaded:
+        for ingredient in ingredients.values():
+            inventory.receive(ingredient, 5000, today)
 
     menu = Menu("Основное меню")
     categories = {
@@ -165,9 +172,9 @@ def _create_demo_kitchen(inventory: Inventory, cook: Cook) -> Kitchen:
     return kitchen
 
 
-def create_demo_app() -> RestaurantApp:
+def create_demo_app(inventory_path: Path | None = None) -> RestaurantApp:
     today = date.today()
-    menu, inventory = _create_demo_menu(today)
+    menu, inventory = _create_demo_menu(today, inventory_path)
     waiter, cashier, courier, cook = _create_demo_staff()
     kitchen = _create_demo_kitchen(inventory, cook)
     return RestaurantApp(
@@ -175,8 +182,29 @@ def create_demo_app() -> RestaurantApp:
     )
 
 
+def _get_inventory_path() -> Path:
+    if sys.platform == "win32":
+        data_dir = Path(
+            os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")
+        )
+    elif sys.platform == "darwin":
+        data_dir = Path.home() / "Library" / "Application Support"
+    else:
+        data_dir = Path(
+            os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")
+        )
+    return data_dir / "RestaurantApp" / "inventory.json"
+
+
 def main() -> None:
-    create_demo_app().run()
+    inventory_path = _get_inventory_path()
+    app = create_demo_app(inventory_path)
+    storage = InventoryStorage(inventory_path)
+    app.inventory.set_change_callback(lambda: storage.save(app.inventory))
+    try:
+        app.run()
+    finally:
+        storage.save(app.inventory)
 
 
 if __name__ == "__main__":

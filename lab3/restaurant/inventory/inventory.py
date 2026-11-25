@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import Callable
 
 from restaurant.catalog.ingredient import Ingredient
 from restaurant.exceptions import InsufficientStockError
@@ -15,10 +16,23 @@ class Inventory:
     def __init__(self) -> None:
         self._batches: list[StockItem] = []
         self._reorder_levels: dict[Ingredient, float] = {}
+        self._change_callback: Callable[[], None] | None = None
+
+    def set_change_callback(self, callback: Callable[[], None] | None) -> None:
+        self._change_callback = callback
+
+    def _notify_change(self) -> None:
+        if self._change_callback is not None:
+            self._change_callback()
+
+    @property
+    def batches(self) -> tuple[StockItem, ...]:
+        return tuple(self._batches)
 
     def receive(self, ingredient: Ingredient, quantity: float, received_on: date) -> StockItem:
         batch = StockItem(ingredient, quantity, received_on)
         self._batches.append(batch)
+        self._notify_change()
         return batch
 
     def set_reorder_level(self, ingredient: Ingredient, level: float) -> None:
@@ -44,6 +58,7 @@ class Inventory:
             if remaining <= QUANTITY_EPSILON:
                 break
         self._batches = [batch for batch in self._batches if not batch.is_empty()]
+        self._notify_change()
 
     def consume_all(self, requirements: dict[Ingredient, float], today: date) -> None:
         for ingredient, amount in requirements.items():
@@ -54,6 +69,8 @@ class Inventory:
     def discard_expired(self, today: date) -> list[StockItem]:
         expired = [batch for batch in self._batches if batch.is_expired(today)]
         self._batches = [batch for batch in self._batches if not batch.is_expired(today)]
+        if expired:
+            self._notify_change()
         return expired
 
     def expiring_soon(self, today: date, within_days: int) -> list[StockItem]:

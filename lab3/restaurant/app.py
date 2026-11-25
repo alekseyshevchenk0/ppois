@@ -374,7 +374,8 @@ class RestaurantApp:
     def _complete_payment(self, bill: Bill, method: PaymentMethod) -> None:
         due = bill.total_with_tip()
         tendered = self._read_money("Внесённая сумма: ") if method is PaymentMethod.CASH else due
-        payment = Payment(bill, method, tendered, datetime.now())
+        payment_time = datetime.combine(self.today, datetime.now().time())
+        payment = Payment(bill, method, tendered, payment_time)
         payment.process(self.cashier)
         self.payments.append(payment)
         self._print_receipt(bill, payment)
