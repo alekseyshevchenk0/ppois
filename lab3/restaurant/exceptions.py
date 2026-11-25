@@ -45,13 +45,6 @@ class EmployeeNotAvailableError(RestaurantError):
         self.reason = reason
 
 
-class InsufficientPointsError(RestaurantError):
-    def __init__(self, requested: int, available: int) -> None:
-        super().__init__(f"Недостаточно бонусных баллов: требуется {requested}, доступно {available}")
-        self.requested = requested
-        self.available = available
-
-
 class UnderageGuestError(RestaurantError):
     def __init__(self, guest_name: str, age: int) -> None:
         super().__init__(f"Гостю «{guest_name}» {age} лет, ему нельзя подавать алкоголь")

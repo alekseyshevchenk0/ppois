@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import math
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
@@ -13,7 +12,6 @@ from restaurant.staff.cashier import Cashier
 class PaymentMethod(Enum):
     CASH = "наличные"
     CARD = "карта"
-    POINTS = "баллы"
 
 
 class Payment:
@@ -29,12 +27,10 @@ class Payment:
         if self.is_completed:
             raise InvalidOrderStateError(self.bill.order.number, self.bill.order.status.value, "оплатить повторно")
         due = self.bill.total_with_tip()
-        handlers = {PaymentMethod.CASH: self._pay_cash, PaymentMethod.CARD: self._pay_card, PaymentMethod.POINTS: self._pay_points}
+        handlers = {PaymentMethod.CASH: self._pay_cash, PaymentMethod.CARD: self._pay_card}
         handlers[self.method](due, cashier)
         self.bill.settle()
         self.is_completed = True
-        if self.method is not PaymentMethod.POINTS:
-            self.bill.order.guest.earn_loyalty_points(self.bill.total_due())
 
     def _pay_cash(self, due: Decimal, cashier: Cashier | None) -> None:
         if cashier is None:
@@ -49,9 +45,3 @@ class Payment:
     def _pay_card(self, due: Decimal, cashier: Cashier | None) -> None:
         if self.tendered != due:
             raise PaymentDeclinedError(f"с карты списывается ровно {due}, указано {self.tendered}")
-
-    def _pay_points(self, due: Decimal, cashier: Cashier | None) -> None:
-        card = self.bill.order.guest.loyalty_card
-        if card is None:
-            raise PaymentDeclinedError("у гостя нет карты лояльности")
-        card.redeem_points(math.ceil(due))

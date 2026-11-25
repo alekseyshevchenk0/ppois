@@ -11,7 +11,6 @@ from restaurant.orders.promo_code import PromoCode
 from restaurant.orders.tip import Tip
 
 MAX_TOTAL_DISCOUNT_PERCENT = Decimal(30)
-LOYALTY_DISCOUNT_NAME = "Карта лояльности"
 
 
 class Bill:
@@ -32,11 +31,6 @@ class Bill:
     def apply_promo(self, promo: PromoCode, day: date) -> None:
         self._ensure_can_apply(promo.discount)
         self._discounts.append(promo.redeem(day))
-
-    def apply_loyalty(self) -> None:
-        percent = self.order.guest.discount_percent()
-        if percent > 0:
-            self.apply_discount(Discount(LOYALTY_DISCOUNT_NAME, percent))
 
     def discount_percent_total(self) -> Decimal:
         requested = sum((discount.percent for discount in self._discounts), Decimal(0))

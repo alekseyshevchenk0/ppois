@@ -5,24 +5,15 @@ from datetime import datetime
 
 from restaurant.exceptions import InvalidDataError
 from restaurant.guests.customer import Customer
-from restaurant.guests.loyalty import LoyaltyTier
 from restaurant.hall.table import Table
 from restaurant.timeunits import SECONDS_IN_MINUTE
 from restaurant.validation import require_positive
-
-NO_CARD_PRIORITY = 0
-TIER_PRIORITY = {LoyaltyTier.BRONZE: 1, LoyaltyTier.SILVER: 2, LoyaltyTier.GOLD: 3}
-
 
 @dataclass(frozen=True)
 class WaitlistEntry:
     guest: Customer
     guests_count: int
     joined_at: datetime
-
-    def priority(self) -> int:
-        card = self.guest.loyalty_card
-        return TIER_PRIORITY[card.tier()] if card else NO_CARD_PRIORITY
 
     def waited_minutes(self, now: datetime) -> int:
         return int((now - self.joined_at).total_seconds() // SECONDS_IN_MINUTE)
@@ -47,7 +38,7 @@ class Waitlist:
         self._entries.remove(self._require(guest))
 
     def ordered(self) -> list[WaitlistEntry]:
-        return sorted(self._entries, key=lambda entry: (-entry.priority(), entry.joined_at))
+        return sorted(self._entries, key=lambda entry: entry.joined_at)
 
     def position_of(self, guest: Customer) -> int:
         return self.ordered().index(self._require(guest)) + 1

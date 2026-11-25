@@ -583,9 +583,9 @@ class RestaurantApp:
         return Customer(name or "Гость", "+70000000000", date(2000, 1, 1), "guest@example.com")
 
     def _read_payment_method(self) -> PaymentMethod | None:
-        self.output_fn("1. Наличные\n2. Карта\n3. Бонусные баллы")
+        self.output_fn("1. Наличные\n2. Банковская карта")
         choice = self._read_int("Способ оплаты: ")
-        methods = {1: PaymentMethod.CASH, 2: PaymentMethod.CARD, 3: PaymentMethod.POINTS}
+        methods = {1: PaymentMethod.CASH, 2: PaymentMethod.CARD}
         method = methods.get(choice)
         if method is None:
             self.output_fn("Неизвестный способ оплаты.")
