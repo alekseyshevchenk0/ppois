@@ -35,7 +35,6 @@ def test_inventory_change_callback_is_called(milk) -> None:
 
 
 def test_inventory_path_uses_xdg_data_home(monkeypatch) -> None:
-    import os
     import sys
     from pathlib import Path
 
@@ -66,7 +65,6 @@ def test_inventory_path_uses_linux_default_when_xdg_is_not_set(monkeypatch) -> N
 
 def test_inventory_path_uses_windows_local_app_data(monkeypatch) -> None:
     import sys
-    from pathlib import Path
 
     from restaurant.__main__ import _get_inventory_path
 
