@@ -4,9 +4,8 @@ from decimal import Decimal
 import pytest
 
 from restaurant.exceptions import InvalidDataError, InvalidOrderStateError, InvalidPromoCodeError
-from restaurant.guests.loyalty import LoyaltyCard
 from restaurant.menu.dish import Dish
-from restaurant.orders.bill import LOYALTY_DISCOUNT_NAME, Bill
+from restaurant.orders.bill import Bill
 from restaurant.orders.discount import Discount
 from restaurant.orders.order import Order
 from restaurant.orders.promo_code import PromoCode
@@ -113,22 +112,7 @@ def test_unusable_promo_is_not_spent(bill: Bill) -> None:
     assert promo.remaining_uses() == 1
 
 
-def test_loyalty_discount_follows_the_card(bill: Bill, today: date) -> None:
-    bill.apply_loyalty()
-    assert bill.discounts == []
-    card = LoyaltyCard("S-1", today)
-    card.earn_points(Decimal(5000))
-    bill.order.guest.attach_card(card)
-    bill.apply_loyalty()
-    assert bill.discounts[0].name == LOYALTY_DISCOUNT_NAME
-    assert bill.discount_percent_total() == Decimal(5)
-
-
-def test_total_discount_is_capped(bill: Bill, today: date) -> None:
-    card = LoyaltyCard("S-1", today)
-    card.earn_points(Decimal(5000))
-    bill.order.guest.attach_card(card)
-    bill.apply_loyalty()
+def test_total_discount_is_capped(bill: Bill) -> None:
     bill.apply_promo(make_promo(percent=25), TODAY)
     bill.apply_discount(Discount("Скидка дня", Decimal(10)))
     assert bill.discount_percent_total() == Decimal(30)

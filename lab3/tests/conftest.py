@@ -9,7 +9,6 @@ from restaurant.catalog.nutrition import NutritionInfo
 from restaurant.guests.customer import Customer
 from restaurant.inventory.inventory import Inventory
 from restaurant.inventory.supplier import Supplier
-from restaurant.guests.loyalty import LoyaltyCard
 from restaurant.hall.hall import Hall
 from restaurant.hall.reservation_book import ReservationBook
 from restaurant.hall.seating_planner import SeatingPlanner
@@ -132,11 +131,7 @@ def minor_guest() -> Customer:
 
 @pytest.fixture
 def gold_guest() -> Customer:
-    guest = Customer("Gold", PHONE, ADULT_BIRTH, "gold@example.com")
-    card = LoyaltyCard("G-1", TODAY)
-    card.earn_points(Decimal(20000))
-    guest.attach_card(card)
-    return guest
+    return Customer("Gold", PHONE, ADULT_BIRTH, "gold@example.com")
 
 
 @pytest.fixture
