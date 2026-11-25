@@ -9,6 +9,7 @@ from restaurant.hall.table import Table
 from restaurant.timeunits import SECONDS_IN_MINUTE
 from restaurant.validation import require_positive
 
+
 @dataclass(frozen=True)
 class WaitlistEntry:
     guest: Customer
