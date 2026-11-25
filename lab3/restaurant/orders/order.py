@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 
+from restaurant.catalog.nutrition import EMPTY_NUTRITION, NutritionInfo
 from restaurant.exceptions import DishUnavailableError, InvalidDataError, InvalidOrderStateError
 from restaurant.guests.customer import Customer
 from restaurant.hall.table import Table
@@ -87,6 +88,12 @@ class Order:
 
     def subtotal(self) -> Decimal:
         return sum((item.total() for item in self._items), Decimal(0))
+
+    def nutrition(self) -> NutritionInfo:
+        total = EMPTY_NUTRITION
+        for item in self._items:
+            total = total.combine(item.dish.nutrition().scale(item.quantity))
+        return total
 
     def validate_for_kitchen(self) -> None:
         self._require_new("отправить на кухню")
