@@ -1,173 +1,134 @@
-# Restaurant Management System — Python OOP Project
+# Restaurant Management System
 
-A Python object-oriented project that models the daily work of a restaurant. It includes a menu and recipes, ingredients and stock batches, customers and dietary preferences, employees and shifts, tables and reservations, orders and kitchen tickets, bills and payments, suppliers and purchase orders, reviews, delivery, dynamic pricing and sales analytics.
+A Python object-oriented project that models the work of a restaurant. The project contains a Russian-language console application and a domain model covering the menu, recipes, ingredients, inventory, guests, employees, orders, kitchen operations, reservations, billing, payments, delivery and sales analytics.
 
-The project is organised as a Python package (`restaurant`) with a separate console application entry point. It uses in-memory objects for the restaurant domain and JSON storage for inventory batches. No database or external service is required.
+The application is organised as the `restaurant` Python package. Runtime functionality uses the Python standard library. Inventory batches are persisted in a JSON file; the remaining application data is kept in memory while the program is running.
 
 ---
 
 ## Project metrics
 
-The counts below reflect the project after removing the loyalty-card subsystem.
+The current project structure contains the following object-oriented design metrics used for the lab assignment:
 
-| Metric | Count |
-|---|---:|
-| Domain and application classes | **56** |
-| Custom exception classes | **14** |
-| All classes, including custom exceptions | **70** |
-| Fields in domain and application classes | **203** |
-| Public behaviour methods | **252** |
-| Class associations | **110** |
+| Metric | Count | Required minimum |
+|---|---:|---:|
+| Domain and application classes | **56** | 50 |
+| Custom exception classes | **14** | — |
+| All classes, including custom exceptions | **70** | 50 |
+| Fields in domain and application classes | **203** | 150 |
+| Public behaviour methods | **252** | 100 |
+| Class associations | **110** | 30 |
 
-Counting rules:
-- The 56 domain and application classes include the console application, model classes and enums, but exclude the 14 custom exception classes.
-- Fields are distinct instance attributes stored on class instances.
-- Behaviour methods are public methods, excluding constructors, private methods and property accessors.
+Counting conventions:
+
+- The 56 domain and application classes include model classes, enums, helper types and `RestaurantApp`; the 14 custom exception classes are counted separately.
+- Fields are distinct instance attributes assigned to `self` or declared as dataclass fields in the 56 domain and application classes. Fields belonging to custom exception classes, enum constants and class-level role labels are not counted.
+- Behaviour methods are public methods that implement domain logic. Constructors, private methods and property accessors are not counted as behaviours.
 - An association is a distinct class-to-class relationship represented by a typed field or a typed method parameter. A class pair is counted once even if it appears in several methods.
 
 ---
 
-## Features
+## Main capabilities
 
-- Manage dishes, menu categories, recipes, ingredients and nutritional information.
-- Track ingredient quantities in separate stock batches, including receipt dates and expiry dates.
-- Consume stock using the earliest-expiry-first approach and identify expired or soon-to-expire batches.
-- Persist inventory batches between launches using a JSON file in the current user's application-data directory.
-- Create and manage customer profiles, dietary preferences and allergens.
-- Create restaurant orders, add and remove order items, and track order statuses.
-- Send orders to kitchen stations, estimate preparation time and monitor delayed kitchen tickets.
-- Calculate bills, apply discounts and promo codes, add tips and process payments by cash or bank card.
-- Manage tables, halls, reservations, no-shows, waiting lists and seating recommendations.
-- Manage employees, roles, shifts, work schedules, payroll, overtime and night bonuses.
-- Work with suppliers, ingredient price lists, purchase orders and stock replenishment.
-- Record food waste and prepare stock reports.
-- Recommend dishes based on customer preferences and available ingredients.
-- Apply dynamic pricing: happy-hour discounts, peak-hour surcharges and discounts for ingredients approaching expiry.
-- Collect and moderate dish reviews.
-- Manage delivery orders and courier assignments.
-- Generate sales reports with revenue, average check, popular dishes and revenue by day.
-- Add, edit and delete dishes through the console interface.
+### Menu and dishes
+
+- Store dishes grouped into menu categories.
+- Describe dishes with recipes, preparation steps, cooking time and ingredient requirements.
+- Add, edit and delete dishes through the console.
+- Check dish availability against current ingredient stock.
+- Build and display a stop list for dishes whose ingredients are insufficient.
+- Calculate the nutritional value of a dish and identify its allergens.
+
+### Orders, bills and payments
+
+- Create an order containing multiple dishes and specify the quantity of each dish.
+- Add order items, change quantities and remove items while the order is in the appropriate state.
+- Track the order lifecycle: new, in progress, ready, served, paid or cancelled.
+- Send order items to kitchen stations and track preparation tickets.
+- Calculate bills, discounts and promotional discounts, add tips and produce receipt lines.
+- Process payments by cash or bank card; cash payments calculate change.
+- Calculate the nutritional value and combined allergens of an entire order.
+- Check a guest's forbidden allergens when a dish is added to an order.
+
+### Inventory and suppliers
+
+- Track ingredient stock in separate batches with receipt and expiry dates.
+- Consume ingredients using the earliest-expiry-first approach.
+- Check stock availability and calculate ingredient shortages.
+- Identify expired and soon-to-expire stock batches.
+- Replenish stock through the console.
+- Store supplier price lists and calculate purchase-order costs and expected delivery dates.
+- Save and restore inventory batches in JSON format.
+- Record food waste with a reason and calculate waste summaries.
+
+### Guests and recommendations
+
+- Store customer information and dietary preferences.
+- Track forbidden allergens, vegetarian preferences and maximum dish price in a guest profile.
+- Check whether a dish is suitable for a guest.
+- Keep order history by dish and calculate frequently ordered dishes.
+- Recommend dishes from the current menu, exclude stopped dishes and, when inventory is provided, filter out dishes that cannot currently be prepared. `GuestProfile` provides checks for allergens, vegetarian preferences and maximum dish price; `Order.add_item()` enforces the guest's forbidden-allergen list.
+
+### Kitchen and staff
+
+- Organise kitchen stations and assign cooks to stations.
+- Estimate preparation time using station workload and cook speed.
+- Create and complete kitchen tickets and identify late tickets.
+- Model employee roles such as waiter, cashier, cook, chef, bartender, manager and courier.
+- Create shifts and schedules, check overlaps and calculate working hours.
+- Calculate overtime, night bonuses and employee payroll.
+
+### Hall and reservations
+
+- Model halls, tables and table capacity.
+- Create, cancel and update reservations; check for time conflicts.
+- Identify no-shows and release reservations when required.
+- Manage a waiting list and estimate waiting time.
+- Select suitable tables and suggest alternative reservation times.
+- Calculate the table requirements and price of a banquet.
+
+### Reviews, delivery and analytics
+
+- Create dish reviews and approve or reject pending reviews in the domain model. The console automatically approves reviews submitted through its interface and displays approved reviews.
+- Create delivery orders, assign couriers and track delivery status. The console workflow creates, assigns and completes a delivery in one action; the domain model supports the individual delivery states.
+- Apply dynamic dish pricing based on time of day and ingredient expiry dates.
+- Calculate order count, revenue, average check, popular dishes and revenue by day.
+
+Some domain capabilities are represented by model classes and tested independently; they are not all exposed as separate actions in the console menu.
 
 ---
 
 ## Classes by module
 
-### `analytics` — Pricing, recommendations, reviews and reports
+The 56 domain and application classes are grouped into the following modules. Enums and helper model types are included in these module totals.
 
-| Class | Main data | Key behaviours |
+| Module | Classes | Responsibility |
 |---|---|---|
-| `DynamicPricer` | `happy_hours`, `happy_discount`, `peak_hours`, `peak_surcharge`, expiry discount settings | `price_for` — Calculates a dish price for a given time and stock state |
-| `MenuRecommender` | `menu` | `recommend` — Recommends dishes suitable for a customer and current stock |
-| `Review` | `customer`, `dish`, `rating`, `comment`, `created_on`, `status` | `approve`, `reject`, `is_visible` — Moderates and checks review visibility |
-| `ReviewStatus` | Review status values | Enum for pending, approved and rejected reviews |
-| `SalesReport` | `payments`, `start_date`, `end_date` | `orders_count`, `total_revenue`, `average_check`, `popular_dishes`, `revenue_by_day` — Calculates sales statistics |
+| `analytics` | `DynamicPricer`, `MenuRecommender`, `Review`, `ReviewStatus`, `SalesReport` | Dynamic prices, dish recommendations, review moderation and sales statistics |
+| `catalog` | `Allergen`, `Ingredient`, `NutritionInfo` | Ingredient data, allergens and nutritional values |
+| `delivery` | `Courier`, `DeliveryOrder`, `DeliveryStatus` | Courier assignments and delivery lifecycle |
+| `guests` | `Customer`, `GuestProfile` | Customer details, preferences and order history |
+| `hall` | `Banquet`, `Hall`, `Reservation`, `ReservationBook`, `SeatingPlanner`, `Table`, `Waitlist`, `WaitlistEntry` | Tables, reservations, seating, banquets and waiting lists |
+| `inventory` | `Inventory`, `InventoryStorage`, `PurchaseOrder`, `StockItem`, `Supplier`, `WasteLog` | Stock batches, JSON storage, suppliers, purchases and waste records |
+| `kitchen` | `Kitchen`, `KitchenStation`, `KitchenTicket` | Kitchen stations, workload and preparation tickets |
+| `menu` | `Dish`, `Menu`, `MenuCategory`, `Recipe` | Menu structure, dishes and recipes |
+| `orders` | `Bill`, `Discount`, `Order`, `OrderItem`, `OrderStatus`, `Payment`, `PaymentMethod`, `PromoCode`, `Tip` | Order lifecycle, billing, discounts, payments and tips |
+| `staff` | `ApprovalLimits`, `Bartender`, `Cashier`, `Chef`, `Cook`, `Employee`, `Manager`, `Payroll`, `Schedule`, `Shift`, `Waiter` | Employee roles, schedules, shifts and payroll |
+| Root package | `Person`, `RestaurantApp` | Shared person data and the console application |
 
-### `catalog` — Ingredients and nutrition
+Additional root-level modules provide shared functionality:
 
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Allergen` | Allergen values | Enum of supported allergens |
-| `Ingredient` | `name`, `unit`, `nutrition_per_unit`, `shelf_life_days`, `allergens`, `is_animal_origin` | `contains_allergen`, `nutrition_for`, `expiry_date` — Checks allergens, calculates nutrition and expiry date |
-| `NutritionInfo` | `calories`, `proteins`, `fats`, `carbs` | `scale`, `combine`, `energy_from_macros`, `is_high_protein`, `is_low_calorie` — Calculates and combines nutritional values |
-
-### `delivery` — Delivery
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Courier` | `transport`, `active_delivery_number`, `completed_deliveries` | `assign_delivery`, `complete_delivery`, `is_available` — Assigns and completes deliveries |
-| `DeliveryOrder` | `number`, `customer`, `address`, `items`, `courier`, `status`, `delivery_fee`, `created_at` | `add_item`, `assign_courier`, `pick_up`, `deliver`, `cancel`, `subtotal`, `total` — Manages a delivery lifecycle |
-| `DeliveryStatus` | Delivery status values | Enum for delivery stages |
-
-### `guests` — Customers and dietary preferences
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Customer` | `email`, `profile`, `visits_count` | `register_visit`, `is_regular`, `can_eat` — Manages customer visits and dietary preferences |
-| `GuestProfile` | `forbidden_allergens`, `is_vegetarian`, `max_dish_price`, order history | `add_allergen`, `remove_allergen`, `accepts`, `record_order`, `times_ordered`, `favorites` — Stores dietary preferences and order history |
-
-### `hall` — Halls, tables and reservations
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Banquet` | `hall`, `organizer`, `guests_count`, `start`, `duration_minutes`, `price_per_guest`, reservations | `required_tables`, `confirm`, `cancel`, `total_price`, `deposit_amount` — Calculates and manages banquets |
-| `Hall` | `name`, `tables`, `is_outdoor` | `add_table`, `remove_table`, `find_table`, `total_capacity`, `tables_for`, `window_tables` — Manages tables in a hall |
-| `Reservation` | `guest`, `table`, `start`, `duration_minutes`, `guests_count`, arrival and cancellation state | `end_time`, `is_active`, `overlaps_with`, `cancel`, `mark_arrived`, `is_no_show` — Manages a reservation |
-| `ReservationBook` | Reservations | `is_table_free`, `book`, `cancel`, `reservations_of`, `reservations_on`, `free_tables`, `no_shows`, `release_no_shows` — Checks and manages reservations |
-| `SeatingPlanner` | `halls`, `reservations`, `waitlist` | `candidate_tables`, `score`, `best_table`, `seat_or_wait`, `promote_from_waitlist`, `suggest_alternative_times` — Selects suitable tables and alternatives |
-| `Table` | `number`, `capacity`, `near_window`, `is_in_service` | `label`, `fits`, `wasted_seats`, `take_out_of_service`, `return_to_service` — Checks table capacity and service status |
-| `Waitlist` | Waiting-list entries | `join`, `leave`, `ordered`, `position_of`, `estimated_wait_minutes`, `next_for`, `take_next_for` — Manages the waiting list |
-| `WaitlistEntry` | `guest`, `guests_count`, `joined_at` | `priority`, `waited_minutes` — Calculates waiting priority and elapsed time |
-
-### `inventory` — Stock, suppliers and waste
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Inventory` | Stock batches, reorder levels, change callback | `receive`, `total_of`, `has_enough`, `consume`, `consume_all`, `discard_expired`, `expiring_soon`, `shortage_amounts`, `stock_report` — Manages stock and expiry |
-| `InventoryStorage` | `path` | `load`, `save` — Loads and saves inventory batches in JSON |
-| `PurchaseOrder` | `supplier`, `created_on`, order lines, receipt state | `for_shortages`, `add_line`, `total_cost`, `expected_delivery`, `receive_into` — Creates and receives supplier orders |
-| `StockItem` | `ingredient`, `quantity`, `received_on` | `expiry_date`, `is_expired`, `days_until_expiry`, `is_empty`, `consume` — Represents an individual stock batch |
-| `Supplier` | `name`, `phone`, `lead_time_days`, `price_list` | `set_price`, `supplies`, `price_of`, `quote`, `delivery_date` — Manages supplier prices and delivery estimates |
-| `WasteLog` | Waste entries | `record`, `total_quantity`, `quantity_by_reason` — Records and summarizes food waste |
-
-### `kitchen` — Kitchen stations and preparation
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Kitchen` | `inventory`, stations, tickets | `add_station`, `station_for`, `estimate_order_minutes`, `accept_order`, `finish_ticket`, `tickets_of`, `order_minutes_left`, `late_tickets`, `station_loads` — Coordinates kitchen work |
-| `KitchenStation` | `name`, `max_wait_minutes`, cooks, tickets | `add_cook`, `cooks_count`, `speed_factor`, `effective_minutes`, `load_minutes`, `estimate_ready_minutes`, `accept`, `release` — Estimates and manages station workload |
-| `KitchenTicket` | `order`, `item`, `station_name`, work and ready times, completion state | `expected_ready_at`, `minutes_left`, `is_late`, `complete` — Tracks preparation of an order item |
-
-### `menu` — Menu, dishes and recipes
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Dish` | `name`, `price`, `recipe`, `description`, `is_stopped` | `stop`, `resume`, `change_price_by_percent`, `allergens`, `is_vegetarian`, `nutrition`, `ensure_safe_for`, `is_available`, `cook`, `days_until_stock_expires` — Validates, prices and prepares dishes |
-| `Menu` | `name`, categories | `add_category`, `category`, `add_dish`, `remove_dish`, `all_dishes`, `find_dish`, `available_dishes`, `stop_list`, `dishes_safe_for`, `vegetarian_dishes`, `dishes_in_price_range`, `most_expensive_dish` — Manages the restaurant menu |
-| `MenuCategory` | `name`, dishes | `add_dish`, `remove_dish`, `find_dish`, `average_price`, `cheapest_dish`, `available_dishes` — Groups and searches dishes |
-| `Recipe` | `steps`, `cooking_minutes`, `portions`, `station`, ingredient requirements | `add_requirement`, `ingredients`, `requirements_for`, `allergens`, `is_vegetarian`, `nutrition_per_portion`, `cooking_time_for`, `missing_for`, `can_be_cooked` — Defines preparation and ingredient requirements |
-
-### `orders` — Orders, bills and payments
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Bill` | `order`, discounts, `tip`, settlement state | `apply_discount`, `apply_promo`, `discount_percent_total`, `discount_amount`, `total_due`, `add_tip`, `total_with_tip`, `settle`, `receipt_lines` — Calculates and settles a bill |
-| `Discount` | `name`, `percent`, `min_order_amount` | `applies_to`, `amount_off` — Checks and calculates a discount |
-| `Order` | `number`, `guest`, `table`, `waiter`, `items`, `status`, `created_at` | `add_item`, `remove_item`, `subtotal`, `validate_for_kitchen`, `send_to_kitchen`, `mark_ready`, `mark_served`, `mark_paid`, `cancel`, `is_closed` — Manages the order lifecycle |
-| `OrderItem` | `dish`, `quantity`, `unit_price`, `note` | `total`, `change_quantity`, `increase`, `is_same_position`, `cooking_minutes` — Represents and calculates an order line |
-| `OrderStatus` | Order status values | Enum for order lifecycle stages |
-| `Payment` | `bill`, `method`, `tendered`, `change`, `paid_at`, completion state | `process` — Processes a payment |
-| `PaymentMethod` | Payment method values | Enum for cash and bank-card payments |
-| `PromoCode` | `code`, `discount`, validity dates, usage limits | `is_valid_on`, `remaining_uses`, `redeem` — Validates and redeems promo codes |
-| `Tip` | `amount`, `waiter`, delivery state | `from_percent`, `percent_of`, `deliver` — Calculates and records a tip |
-
-### `staff` — Employees, roles, shifts and payroll
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `ApprovalLimits` | `max_discount_percent`, `max_overtime_hours`, `refund_limit` | Stores manager approval limits |
-| `Bartender` | `drinks_made`, alcohol certification | `can_serve_alcohol_to`, `serve_drink` — Checks age restrictions and serves drinks |
-| `Cashier` | `register_number`, `cash_in_till`, `transactions_count` | `accept_cash`, `give_change`, `close_till` — Handles cash operations |
-| `Chef` | `cuisine`, approved dishes | `approve`, `revoke`, `has_approved`, `suggest_special` — Approves dishes and suggests specials |
-| `Cook` | `skill_level`, `station` | `can_work_station`, `move_to_station`, `promote`, `speed_factor`, `adjusted_minutes` — Checks skills and preparation speed |
-| `Employee` | `hire_date`, `hourly_rate`, `is_active` | `years_of_service`, `give_raise`, `dismiss`, `reinstate`, `ensure_active` — Manages employee status and pay rate |
-| `Manager` | `limits`, `approvals_count` | `can_approve_discount`, `can_approve_refund`, `approve_overtime`, `assign_shift` — Manages approvals and shifts |
-| `Payroll` | `schedule`, tax and overtime settings, night bonus | `overtime_hours`, `night_bonus`, `gross_pay`, `payslip` — Calculates employee pay |
-| `Schedule` | Shifts | `add_shift`, `remove_shift`, `shifts_on`, `shifts_of`, `on_duty_at`, `week_shifts`, `weekly_hours` — Manages employee schedules |
-| `Shift` | `employee`, `day`, `start`, `end` | `duration_hours`, `overlaps`, `covers`, `night_hours` — Calculates and checks shifts |
-| `Waiter` | `languages`, `guests_served`, `tips_total` | `speaks`, `receive_tip`, `serve_guests`, `average_tip_per_guest` — Tracks waiter service and tips |
-
-### Root-level application and shared entities
-
-| Class | Main data | Key behaviours |
-|---|---|---|
-| `Person` | `name`, `phone`, `birth_date` | `age_on`, `is_adult`, `matches` — Provides shared person data and age checks |
-| `RestaurantApp` | Menu, inventory, staff, kitchen, orders, reservations, payments, reviews and deliveries | `run` — Runs the console menu and dispatches user actions |
+- `money.py` — decimal percentage calculations for monetary amounts.
+- `timeunits.py` — time conversion constants.
+- `validation.py` — common validation functions.
+- `exceptions.py` — the custom exception hierarchy.
+- `__main__.py` — demo data creation, inventory storage setup and application entry point.
 
 ---
 
 ## Custom exceptions
 
-The project defines **14 custom exception classes**. They provide domain-specific error messages in Russian.
+The project defines **14 custom exception classes**, including the base `RestaurantError` class. They represent errors specific to restaurant operations and provide Russian-language messages.
 
 | Exception | Purpose |
 |---|---|
@@ -190,59 +151,72 @@ The project defines **14 custom exception classes**. They provide domain-specifi
 
 ## Console interface
 
-Run the application from the `lab3` directory:
+Run the application from the project root (`lab3`):
 
 ```bash
 python -m restaurant
 ```
 
-The interface and user-facing messages are in Russian. Payments are supported in cash or by bank card. The console menu provides the following actions:
+The console interface and user-facing messages are in Russian. The main menu provides the following actions:
 
-1. Show the restaurant menu.
-2. Show currently available dishes.
-3. View inventory balances.
-4. Create an order.
-5. View orders.
-6. Get dish recommendations.
-7. View dynamic prices.
-8. Manage order preparation and serving.
-9. Pay for an order.
-10. Create a reservation.
-11. Manage dish reviews.
-12. View the sales report.
-13. Manage delivery.
-14. View the stop list.
-15. Manage reservations.
-16. Add a dish.
-17. Change a dish price.
-18. Delete a dish.
-0. Exit.
+| Option | Action |
+|---:|---|
+| 1 | Show the restaurant menu |
+| 2 | Show currently available dishes |
+| 3 | View inventory balances |
+| 4 | Create an order containing one or more dishes |
+| 5 | View orders |
+| 6 | Get dish recommendations |
+| 7 | View dynamic prices |
+| 8 | Manage order preparation and serving |
+| 9 | Pay for an order |
+| 10 | Create a reservation |
+| 11 | Submit a dish review or view approved reviews |
+| 12 | View the sales report |
+| 13 | Create and complete a delivery or view deliveries |
+| 14 | View the stop list |
+| 15 | Manage reservations |
+| 16 | Add a dish |
+| 17 | Change a dish price |
+| 18 | Delete a dish |
+| 19 | Replenish inventory |
+| 20 | View nutritional information and allergens |
+| 0 | Exit |
 
-The demo application starts with 15 dishes in four categories: salads, soups, main courses and desserts.
+When creating an order, the user can select several dishes and set the quantity for each one. Entering `0` finishes dish selection. An order is not created when no dish has been selected.
+
+The nutritional-information option has two actions:
+
+1. Display the nutritional values per serving, allergens and vegetarian status of a dish.
+2. Display the total nutritional values and combined allergens of an order.
+
+The demo application starts with **15 dishes** in four categories: salads, soups, main courses and desserts. It also creates demo employees, an inventory and a kitchen station.
 
 ---
 
 ## Inventory persistence
 
-Inventory batches are saved automatically in a JSON file. The file is created on the first application run and updated when stock changes and when the application exits.
+Inventory batches are saved automatically in a JSON file. The file is written when stock batches are received, consumed or discarded, and again when the application exits. On startup, the application attempts to restore the saved batches.
 
 The file is stored in the current user's application-data directory:
 
 - Linux: `~/.local/share/RestaurantApp/inventory.json`
-- Windows: `%LOCALAPPDATA%\RestaurantApp\inventory.json`
+- Windows: `%LOCALAPPDATA%/RestaurantApp/inventory.json`
 - macOS: `~/Library/Application Support/RestaurantApp/inventory.json`
 
-On Linux, the application respects the `XDG_DATA_HOME` environment variable when it is set.
+On Linux, the application respects the `XDG_DATA_HOME` environment variable when it is set. On Windows, it uses `LOCALAPPDATA` when available.
 
-The JSON stores the ingredient name, batch quantity and original receipt date. This preserves expiry-date calculations between application launches. The JSON file is user data and should not be included in the source archive or GitHub Release assets.
+The JSON file stores the ingredient name, batch quantity and original receipt date. Keeping the receipt date allows the application to calculate expiry dates after a restart. Inventory data is persisted; orders, reservations, payments, reviews, deliveries and menu changes are not saved between application runs.
+
+The inventory JSON file is user data and should not be included in the source archive or Git repository.
 
 ---
 
 ## Development setup
 
-All commands are run from the `lab3` directory.
+All commands below are run from the `lab3` directory.
 
-### Create the environment and install development dependencies
+### Create a virtual environment and install development dependencies
 
 Linux / macOS:
 
@@ -260,19 +234,25 @@ python -m venv .venv
 python -m pip install -r requirements-dev.txt
 ```
 
+Python **3.10 or newer** is required. The application itself uses only the Python standard library. Development dependencies are:
+
+- `pytest` — test runner.
+- `pytest-cov` — test coverage and branch coverage reports.
+- `flake8` — code style and complexity checks.
+
 ### Run the console application
 
 ```bash
 python -m restaurant
 ```
 
-### Run unit tests and check coverage
+### Run tests and check coverage
 
 ```bash
 python -m pytest
 ```
 
-`pytest.ini` enables branch coverage and sets the minimum coverage threshold to 90%.
+`pytest.ini` enables branch coverage and requires at least **90%** total coverage. The supplied project archive was checked with **289 passing tests** and **98.01%** total coverage.
 
 ### Run the linter
 
@@ -280,7 +260,7 @@ python -m pytest
 python -m flake8 restaurant tests
 ```
 
-The `.flake8` configuration sets a maximum line length of 150 characters and a maximum McCabe complexity of 6. It excludes virtual environments and generated cache directories.
+The `.flake8` configuration sets a maximum line length of **150 characters** and a maximum McCabe complexity of **6**. Virtual environments and generated cache directories are excluded. Run the linter against `restaurant` and `tests`, not against the entire project directory, so that installed packages in the virtual environment are not analysed.
 
 ---
 
@@ -288,31 +268,40 @@ The `.flake8` configuration sets a maximum line length of 150 characters and a m
 
 ```text
 lab3/
+├── README.md
+├── requirements-dev.txt
+├── pytest.ini
+├── .flake8
 ├── restaurant/
 │   ├── __init__.py
-│   ├── __main__.py             # Application entry point and demo data
-│   ├── app.py                  # Russian console interface
-│   ├── exceptions.py           # 15 custom exceptions
-│   ├── money.py                # Money-related value object
-│   ├── person.py               # Shared person entity
-│   ├── timeunits.py            # Time-related value object
-│   ├── validation.py           # Shared validation helpers
+│   ├── __main__.py
+│   ├── app.py
+│   ├── exceptions.py
+│   ├── money.py
+│   ├── person.py
+│   ├── timeunits.py
+│   ├── validation.py
 │   ├── analytics/
+│   │   ├── __init__.py
 │   │   ├── dynamic_pricer.py
 │   │   ├── menu_recommender.py
 │   │   ├── review.py
 │   │   └── sales_report.py
 │   ├── catalog/
+│   │   ├── __init__.py
 │   │   ├── allergen.py
 │   │   ├── ingredient.py
 │   │   └── nutrition.py
 │   ├── delivery/
+│   │   ├── __init__.py
 │   │   ├── courier.py
 │   │   └── delivery_order.py
 │   ├── guests/
+│   │   ├── __init__.py
 │   │   ├── customer.py
 │   │   └── profile.py
 │   ├── hall/
+│   │   ├── __init__.py
 │   │   ├── banquet.py
 │   │   ├── hall.py
 │   │   ├── reservation.py
@@ -321,6 +310,7 @@ lab3/
 │   │   ├── table.py
 │   │   └── waitlist.py
 │   ├── inventory/
+│   │   ├── __init__.py
 │   │   ├── inventory.py
 │   │   ├── purchase_order.py
 │   │   ├── stock_item.py
@@ -328,15 +318,18 @@ lab3/
 │   │   ├── supplier.py
 │   │   └── waste_log.py
 │   ├── kitchen/
+│   │   ├── __init__.py
 │   │   ├── kitchen.py
 │   │   ├── kitchen_station.py
 │   │   └── kitchen_ticket.py
 │   ├── menu/
+│   │   ├── __init__.py
 │   │   ├── category.py
 │   │   ├── dish.py
 │   │   ├── menu.py
 │   │   └── recipe.py
 │   ├── orders/
+│   │   ├── __init__.py
 │   │   ├── bill.py
 │   │   ├── discount.py
 │   │   ├── order.py
@@ -345,6 +338,7 @@ lab3/
 │   │   ├── promo_code.py
 │   │   └── tip.py
 │   └── staff/
+│       ├── __init__.py
 │       ├── bartender.py
 │       ├── cashier.py
 │       ├── chef.py
@@ -355,13 +349,11 @@ lab3/
 │       ├── schedule.py
 │       ├── shift.py
 │       └── waiter.py
-├── tests/
-│   ├── conftest.py
-│   ├── constants.py
-│   └── test_*.py
-├── .flake8
-├── pytest.ini
-└── requirements-dev.txt
+└── tests/
+    ├── __init__.py
+    ├── conftest.py
+    ├── constants.py
+    └── test_*.py
 ```
 
 ---
@@ -370,8 +362,8 @@ lab3/
 
 - Python 3.10 or newer is required.
 - The application uses the Python standard library at runtime.
-- Development dependencies are `pytest`, `pytest-cov` and `flake8`.
-- The domain model is separated into modules by responsibility.
-- The console application depends on the `restaurant` domain package; domain classes do not depend on the console interface.
-- Inventory persistence is limited to stock batches. Menu edits, orders and other in-memory application records are not persisted between runs.
-- Branch coverage is measured by pytest-cov; a high percentage does not by itself prove that every business scenario has been tested.
+- Development dependencies are listed in `requirements-dev.txt`.
+- The domain model is organised into modules by responsibility.
+- `RestaurantApp` coordinates the console interface and uses the domain package; domain classes do not depend on the console interface.
+- Inventory persistence is limited to stock batches. Other application records are not persisted between runs.
+- Test coverage is measured with branch coverage. A high coverage percentage does not by itself prove that every possible business scenario has been tested.
