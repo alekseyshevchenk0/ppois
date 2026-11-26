@@ -8,7 +8,6 @@ from restaurant.staff.employee import Employee
 
 
 class Courier(Employee):
-    role_title = "курьер"
 
     def __init__(
         self,

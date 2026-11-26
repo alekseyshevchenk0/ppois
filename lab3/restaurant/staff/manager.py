@@ -18,7 +18,6 @@ class ApprovalLimits:
 
 
 class Manager(Employee):
-    role_title = "manager"
 
     def __init__(
         self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date, limits: ApprovalLimits

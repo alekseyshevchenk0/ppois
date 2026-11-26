@@ -9,7 +9,6 @@ from restaurant.validation import require_positive
 
 
 class Waiter(Employee):
-    role_title = "waiter"
 
     def __init__(
         self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date, languages: Iterable[str] = ()

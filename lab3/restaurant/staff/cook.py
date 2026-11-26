@@ -16,8 +16,6 @@ SPEED_STEP = 0.1
 
 class Cook(Employee):
 
-    role_title = "cook"
-
     def __init__(
         self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date, station: str, skill_level: int = BASELINE_SKILL
     ) -> None:

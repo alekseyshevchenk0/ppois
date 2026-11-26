@@ -12,7 +12,6 @@ DAYS_IN_YEAR = 365
 
 
 class Employee(Person):
-    role_title = "employee"
 
     def __init__(self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date) -> None:
         super().__init__(name, phone, birth_date)

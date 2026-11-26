@@ -9,7 +9,6 @@ from restaurant.staff.employee import Employee
 
 
 class Bartender(Employee):
-    role_title = "bartender"
 
     def __init__(
         self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date, is_alcohol_certified: bool = True

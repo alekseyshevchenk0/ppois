@@ -11,7 +11,6 @@ from restaurant.validation import require_non_empty
 
 
 class Chef(Employee):
-    role_title = "chef"
 
     def __init__(self, name: str, phone: str, birth_date: date, hourly_rate: Decimal, hire_date: date, cuisine: str) -> None:
         super().__init__(name, phone, birth_date, hourly_rate, hire_date)
