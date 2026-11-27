@@ -1,0 +1,82 @@
+name: lab4
+
+on:
+  push:
+    branches: [main]
+    paths: ["lab4/**", ".github/workflows/lab4.yml"]
+    tags: ["lab4-v*"]
+  pull_request:
+    paths: ["lab4/**", ".github/workflows/lab4.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint and tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lab4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: lab4/requirements-dev.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Code quality (flake8)
+        run: flake8 .
+      - name: Tests and coverage (threshold 90%)
+        run: python -m pytest
+
+  build:
+    name: Build ${{ matrix.artifact }}
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/lab4-v')
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            file: graph-sorting
+            artifact: graph-sorting-linux
+          - os: windows-latest
+            file: graph-sorting.exe
+            artifact: graph-sorting-windows.exe
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: lab4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+      - name: Build standalone executable
+        run: |
+          pyinstaller --onefile --name graph-sorting --paths . main.py
+          mv "dist/${{ matrix.file }}" "dist/${{ matrix.artifact }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: lab4/dist/${{ matrix.artifact }}
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
