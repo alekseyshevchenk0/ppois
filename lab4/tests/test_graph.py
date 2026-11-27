@@ -182,7 +182,7 @@ def test_self_loop_and_vertex_removal():
     graph = DirectedGraph(["X"])
     graph.add_edge("X", "X")
     assert graph.degree("X") == 2
-    assert graph.edge_degree("X", "X") == 2
+    assert graph.edge_degree("X", "X") == 0
     graph.remove_vertex("X")
     assert graph.edge_count == 0
 
@@ -213,3 +213,23 @@ def test_remove_vertex_at_supports_none_vertex():
     next(iterator)
     assert graph.remove_vertex_at(iterator) is None
     assert graph.is_empty()
+
+
+def test_incident_edges_returns_self_loop_once():
+    graph = DirectedGraph(["X"])
+    graph.add_edge("X", "X")
+    assert list(graph.incident_edges("X")) == [("X", "X")]
+
+
+def test_edge_degree_counts_unique_adjacent_edges():
+    graph = DirectedGraph(["A", "B", "C"])
+    graph.add_edge("A", "B")
+    graph.add_edge("B", "A")
+    graph.add_edge("A", "C")
+    assert graph.edge_degree("A", "B") == 2
+
+
+def test_edge_degree_of_only_self_loop_is_zero():
+    graph = DirectedGraph(["X"])
+    graph.add_edge("X", "X")
+    assert graph.edge_degree("X", "X") == 0

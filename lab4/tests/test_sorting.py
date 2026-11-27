@@ -66,3 +66,23 @@ def test_bozo_sort_errors():
 
 def test_bozo_sort_empty():
     assert bozo_sort([]) == []
+
+
+class LessOnly:
+    def __init__(self, value):
+        self.value = value
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+
+def test_merge_sort_supports_less_than_only_objects():
+    values = [LessOnly(3), LessOnly(1), LessOnly(2)]
+    result = merge_sort(values)
+    assert [item.value for item in result] == [1, 2, 3]
+
+
+def test_bozo_sort_supports_less_than_only_objects():
+    values = [LessOnly(3), LessOnly(1), LessOnly(2)]
+    result = bozo_sort(values, rng=Random(4))
+    assert [item.value for item in result] == [1, 2, 3]
