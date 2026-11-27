@@ -129,6 +129,44 @@ def _iterator_menu(graph):
             print("Ошибка:", error)
 
 
+def _bidirectional_iterator_demo(graph):
+    print("\nДВУНАПРАВЛЕННОЕ ПЕРЕМЕЩЕНИЕ")
+    print("1. Итератор вершин")
+    print("2. Итератор рёбер")
+    print("0. Назад")
+    choice = input("Выберите тип итератора: ").strip()
+
+    if choice == "0":
+        return
+    if choice == "1":
+        iterator = graph.vertices()
+    elif choice == "2":
+        iterator = graph.edges()
+    else:
+        print("Неизвестный пункт меню.")
+        return
+
+    print("Команды: n — следующий, p — предыдущий, 0 — выход")
+    while True:
+        command = input("Перемещение: ").strip().lower()
+        if command == "0":
+            return
+        if command not in ("n", "p"):
+            print("Неизвестная команда.")
+            continue
+
+        try:
+            value = (
+                iterator.move_next()
+                if command == "n"
+                else iterator.move_prev()
+            )
+            direction = "Следующий" if command == "n" else "Предыдущий"
+            print(f"{direction} элемент:", value)
+        except StopIteration:
+            print("Достигнута граница последовательности.")
+
+
 def _remove_by_iterator(graph, element_type):
     if element_type == "vertex":
         values = list(graph.vertices())
@@ -221,6 +259,7 @@ def _graph_menu():
         print("15. Удалить вершину через итератор")
         print("16. Удалить ребро через итератор")
         print("17. Копирование и сравнение графов")
+        print("18. Двунаправленное перемещение итератора")
         print("0. Назад")
         choice = input("Выберите действие: ").strip()
 
@@ -308,6 +347,8 @@ def _graph_menu():
                 _remove_by_iterator(graph, "edge")
             elif choice == "17":
                 _graph_copy_menu(graph)
+            elif choice == "18":
+                _bidirectional_iterator_demo(graph)
             elif choice == "0":
                 return
             else:
