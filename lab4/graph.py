@@ -28,19 +28,32 @@ class GraphIterator(Iterator):
         return self
 
     def __next__(self):
+        return self.move_next()
+
+    def move_next(self):
         if self._index < 0 or self._index >= len(self._values):
             self._last = _NOT_SET
             raise StopIteration
         value = self._values[self._index]
         self._last = value
         self._index += self._step
-        return value
+        return deepcopy(value) if self.read_only else value
+
+    def move_prev(self):
+        previous_index = self._index - self._step
+        if previous_index < 0 or previous_index >= len(self._values):
+            self._last = _NOT_SET
+            raise StopIteration
+        self._index = previous_index
+        value = self._values[self._index]
+        self._last = value
+        return deepcopy(value) if self.read_only else value
 
     @property
     def current(self):
         if self._last is _NOT_SET:
             raise RuntimeError("Итератор ещё не возвращал элемент.")
-        return self._last
+        return deepcopy(self._last) if self.read_only else self._last
 
     def __reversed__(self):
         return GraphIterator(
@@ -364,7 +377,9 @@ class DirectedGraph(Generic[V]):
             raise TypeError("Ожидается итератор графа.")
         if iterator._owner is not self or iterator.kind != expected_kind:
             raise ValueError("Итератор принадлежит другому контейнеру.")
-        return iterator.current
+        if iterator._last is _NOT_SET:
+            raise RuntimeError("Итератор ещё не возвращал элемент.")
+        return iterator._last
 
     def __iter__(self):
         return self.vertices()
