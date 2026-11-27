@@ -3,6 +3,7 @@ from typing import Generic, Hashable, Iterable, Iterator, Optional, Tuple, TypeV
 
 V = TypeVar("V", bound=Hashable)
 Edge = Tuple[V, V]
+_NOT_SET = object()
 
 
 class GraphIterator(Iterator):
@@ -20,7 +21,7 @@ class GraphIterator(Iterator):
         self._values = tuple(values)
         self._index = len(self._values) - 1 if reverse else 0
         self._step = -1 if reverse else 1
-        self._last = None
+        self._last = _NOT_SET
         self.read_only = read_only
 
     def __iter__(self):
@@ -28,7 +29,7 @@ class GraphIterator(Iterator):
 
     def __next__(self):
         if self._index < 0 or self._index >= len(self._values):
-            self._last = None
+            self._last = _NOT_SET
             raise StopIteration
         value = self._values[self._index]
         self._last = value
@@ -37,7 +38,7 @@ class GraphIterator(Iterator):
 
     @property
     def current(self):
-        if self._last is None:
+        if self._last is _NOT_SET:
             raise RuntimeError("Итератор ещё не возвращал элемент.")
         return self._last
 
