@@ -230,7 +230,10 @@ class DirectedGraph(Generic[V]):
     def edge_degree(self, source: V, target: V) -> int:
         if not self.has_edge(source, target):
             raise KeyError("Ребро не найдено.")
-        return self.degree(source) + self.degree(target) - 2
+        incident = set(self.incident_edges(source))
+        incident.update(self.incident_edges(target))
+        incident.discard((source, target))
+        return len(incident)
 
     def vertices(self) -> GraphIterator:
         return GraphIterator(self, "vertex", self._vertices.keys())
@@ -266,7 +269,7 @@ class DirectedGraph(Generic[V]):
         self._require_vertex(value)
         result = list(self._outgoing(value))
         result.extend(self._incoming(value))
-        return result
+        return list(dict.fromkeys(result))
 
     def _outgoing(self, value: V):
         current = self._vertices[value].first_out

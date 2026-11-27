@@ -26,8 +26,8 @@ def merge_sort(
         while left_index < len(left) and right_index < len(right):
             left_value = _value(left[left_index], key)
             right_value = _value(right[right_index], key)
-            if (left_value >= right_value) if reverse else (
-                left_value <= right_value
+            if (not left_value < right_value) if reverse else (
+                not right_value < left_value
             ):
                 merged.append(left[left_index])
                 left_index += 1
@@ -69,7 +69,7 @@ def bozo_sort(
         for index in range(len(items) - 1):
             first = _value(items[index], key)
             second = _value(items[index + 1], key)
-            if first < second if reverse else first > second:
+            if (first < second) if reverse else (second < first):
                 return False
         return True
 
