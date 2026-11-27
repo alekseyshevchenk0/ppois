@@ -49,3 +49,41 @@ def merge_sort(
 
     items[:] = sort_part(items)
     return items
+
+
+def bozo_sort(
+    items: List[T],
+    key: KeyFunc = None,
+    reverse: bool = False,
+    max_attempts: int = 100_000,
+    rng: Optional[Random] = None,
+) -> List[T]:
+    if not isinstance(items, list):
+        raise TypeError("Ожидается список Python.")
+    if max_attempts < 0:
+        raise ValueError("Количество попыток не может быть отрицательным.")
+
+    generator = rng if rng is not None else Random()
+
+    def is_sorted() -> bool:
+        for index in range(len(items) - 1):
+            first = _value(items[index], key)
+            second = _value(items[index + 1], key)
+            if first < second if reverse else first > second:
+                return False
+        return True
+
+    attempts = 0
+    while not is_sorted():
+        if attempts >= max_attempts:
+            raise TimeoutError(
+                "Bozo sort превысил допустимое количество перестановок."
+            )
+        first_index = generator.randrange(len(items))
+        second_index = generator.randrange(len(items))
+        items[first_index], items[second_index] = (
+            items[second_index],
+            items[first_index],
+        )
+        attempts += 1
+    return items
