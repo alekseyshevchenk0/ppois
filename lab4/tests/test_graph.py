@@ -233,3 +233,87 @@ def test_edge_degree_of_only_self_loop_is_zero():
     graph = DirectedGraph(["X"])
     graph.add_edge("X", "X")
     assert graph.edge_degree("X", "X") == 0
+
+
+def test_bidirectional_vertex_iterator():
+    graph = DirectedGraph(["A", "B", "C"])
+    iterator = graph.vertices()
+
+    with pytest.raises(StopIteration):
+        iterator.move_prev()
+
+    assert iterator.move_next() == "A"
+    assert iterator.move_next() == "B"
+    assert iterator.move_prev() == "B"
+    assert iterator.move_prev() == "A"
+
+    with pytest.raises(StopIteration):
+        iterator.move_prev()
+
+    assert iterator.move_next() == "A"
+
+
+def test_bidirectional_reverse_iterator():
+    graph = DirectedGraph(["A", "B", "C"])
+    iterator = graph.reverse_vertices()
+
+    assert iterator.move_next() == "C"
+    assert iterator.move_next() == "B"
+    assert iterator.move_prev() == "B"
+    assert iterator.move_next() == "B"
+    assert iterator.move_next() == "A"
+
+    with pytest.raises(StopIteration):
+        iterator.move_next()
+
+    assert iterator.move_prev() == "A"
+
+
+def test_bidirectional_edge_iterator():
+    graph = make_graph()
+    iterator = graph.edges()
+    edges = list(graph.edges())
+
+    assert iterator.move_next() == edges[0]
+    assert iterator.move_next() == edges[1]
+    assert iterator.move_prev() == edges[1]
+    assert iterator.move_next() == edges[1]
+
+
+def test_const_iterator_returns_deep_copies():
+    class MutableHashable:
+        def __init__(self, value):
+            self.value = value
+
+        def __hash__(self):
+            return hash(self.value)
+
+        def __eq__(self, other):
+            return (
+                isinstance(other, MutableHashable)
+                and self.value == other.value
+            )
+
+    original = MutableHashable("original")
+    graph = DirectedGraph([original])
+    iterator = graph.const_vertices()
+
+    returned = next(iterator)
+    assert returned is not original
+    returned.value = "changed"
+    assert original.value == "original"
+
+    current = iterator.current
+    assert current is not original
+    current.value = "changed again"
+    assert original.value == "original"
+
+
+def test_const_iterator_can_remove_using_original_value():
+    graph = DirectedGraph(["A", "B"])
+    iterator = graph.const_vertices()
+    assert next(iterator) == "A"
+
+    assert graph.remove_vertex_at(iterator) == "A"
+    assert not graph.has_vertex("A")
+    assert graph.has_vertex("B")
